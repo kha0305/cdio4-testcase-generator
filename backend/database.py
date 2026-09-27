@@ -55,5 +55,39 @@ def get_db():
 
 
 def init_db():
-    """Tạo tất cả các bảng nếu chưa tồn tại."""
+    """Tạo tất cả các bảng nếu chưa tồn tại và nạp tài khoản mẫu ban đầu."""
+    import models
     Base.metadata.create_all(bind=engine)
+
+    # Đảm bảo luôn có 2 tài khoản mẫu (qalead, tester01) phục vụ kiểm thử và trải nghiệm
+    db = SessionLocal()
+    try:
+        qalead = db.query(models.User).filter(models.User.username == "qalead").first()
+        if not qalead:
+            try:
+                import bcrypt
+                pwd_hash = bcrypt.hashpw("123456".encode("utf-8"), bcrypt.gensalt(rounds=12)).decode("utf-8")
+            except Exception:
+                import hashlib
+                pwd_hash = hashlib.sha256("123456".encode("utf-8")).hexdigest()
+
+            db.add(models.User(
+                username="qalead",
+                email="qalead@cdio.edu.vn",
+                full_name="Trần Minh (QA Lead)",
+                password_hash=pwd_hash,
+                role="lead"
+            ))
+            db.add(models.User(
+                username="tester01",
+                email="tester01@cdio.edu.vn",
+                full_name="Nguyễn Văn A (Tester)",
+                password_hash=pwd_hash,
+                role="tester"
+            ))
+            db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"[CẢNH BÁO] Không thể nạp tài khoản mẫu tự động: {e}")
+    finally:
+        db.close()

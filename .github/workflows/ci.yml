@@ -32,6 +32,7 @@ jobs:
           python -m uvicorn main:app --app-dir backend --host 127.0.0.1 --port 8000 &
           sleep 5
           curl --retry 5 --retry-delay 2 http://127.0.0.1:8000/docs
+          python migrate_db.py
 
       - name: Chay Bo Kiem Thu Tich Hop 18/18 Buoc (System Test)
         run: |
