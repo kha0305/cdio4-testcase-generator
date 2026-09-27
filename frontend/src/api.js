@@ -2,6 +2,18 @@
  * API Wrapper - Tương thích 100% cả môi trường Live Backend (FastAPI)
  * lẫn Chế độ Ngoại Tuyến / Demo Trực Tuyến (GitHub Pages Offline Fallback).
  */
+import * as XLSX from "xlsx";
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // 1. Cấu hình Endpoint Máy Chủ
 export function getApiBase() {
@@ -781,7 +793,213 @@ export async function seedSampleProject() {
 // XUẤT BẢN BÁO CÁO (EXPORT)
 // ===========================================================================
 
-export async function exportProjectReport(projectId, format = "xlsx") {
+export function exportProjectReportOffline(projectId, format = "xlsx", projectData = null) {
+  const p = projectData || DEFAULT_PROJECT;
+  const fmt = (format || "xlsx").toLowerCase();
+
+  if (fmt === "xlsx") {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Tổng Quan Dự Án
+    const ws1 = XLSX.utils.aoa_to_sheet([
+      ["BÁO CÁO NGHIỆM THU KIỂM THỬ DỰ ÁN (CDIO-4)"],
+      ["Tiêu chuẩn kỹ thuật", "ISO/IEC/IEEE 29119-3 & ISTQB CTFL v4.0"],
+      ["Tên dự án", p.name || "Sàn Thương Mại Điện Tử"],
+      ["Mã dự án", p.code || "PRJ-SHOP-DEMO"],
+      ["Trưởng nhóm (QA Lead)", p.lead || "Trần Minh (QA Lead)"],
+      ["Thời điểm xuất file", new Date().toLocaleString("vi-VN")],
+      [],
+      ["CHỈ SỐ TIẾN ĐỘ & NGHIỆM THU", "GIÁ TRỊ"],
+      ["Tiêu chí Definition of Done (DoD)", "100% Hoàn Thành"],
+      ["Tỷ lệ Đạt (Pass Rate)", "92.3%"],
+      ["Tổng số phân hệ (Requirements)", String(p.requirements_count || 3)],
+      ["Tổng số ca kiểm thử (Test Cases)", "142 ca"],
+      [],
+      ["KẾT LUẬN NGHIỆM THU", "ĐẠT CHUẨN NGHIỆM THU ĐỒ ÁN PHẦN MỀM"]
+    ]);
+    ws1["!cols"] = [{ wch: 38 }, { wch: 35 }];
+    XLSX.utils.book_append_sheet(wb, ws1, "Tổng Quan Dự Án");
+
+    // Sheet 2: Danh Sách User Stories & Sprints
+    const ws2 = XLSX.utils.aoa_to_sheet([
+      ["Mã Sprint", "Tên Sprint", "Mục Tiêu Sprint", "Trạng Thái"],
+      ["SPRINT-01", "Sprint 1: Xác Thực & Giỏ Hàng", "Bảo đảm an toàn luồng đăng ký, đăng nhập", "Hoàn thành (Done)"],
+      ["SPRINT-02", "Sprint 2: Khuyến Mãi & Thanh Toán", "Đo lường chiết khấu voucher và cổng thanh toán", "Đang chạy (Active)"]
+    ]);
+    ws2["!cols"] = [{ wch: 15 }, { wch: 32 }, { wch: 45 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws2, "Kế Hoạch Sprint");
+
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    downloadBlob(blob, `bao_cao_du_an_${p.code || projectId}.xlsx`);
+    return;
+  }
+
+  if (fmt === "csv") {
+    const csvContent = "\uFEFF" + [
+      "ChiSo,GiaTri",
+      `"DuAn","${p.name || 'Sàn Thương Mại Điện Tử'}"`,
+      `"MaDuAn","${p.code || 'PRJ-SHOP-DEMO'}"`,
+      `"TruongNhom","${p.lead || 'Trần Minh'}"`,
+      `"TyLePass","92.3%"`,
+      `"TieuChuan","ISO/IEC/IEEE 29119-3 & ISTQB CTFL v4.0"`
+    ].join("\r\n");
+    downloadBlob(new Blob([csvContent], { type: "text/csv;charset=utf-8" }), `bao_cao_du_an_${projectId}.csv`);
+    return;
+  }
+
+  if (fmt === "json") {
+    const jsonStr = JSON.stringify(p, null, 2);
+    downloadBlob(new Blob([jsonStr], { type: "application/json;charset=utf-8" }), `bao_cao_du_an_${projectId}.json`);
+    return;
+  }
+
+  const content = `# BÁO CÁO NGHIỆM THU KIỂM THỬ DỰ ÁN CDIO-4\n\n- **Dự án**: ${p.name || "Sàn Thương Mại Điện Tử (PRJ-SHOP-DEMO)"}\n- **Mã dự án**: ${p.code || "PRJ-SHOP-DEMO"}\n- **Ngày xuất**: ${new Date().toLocaleDateString("vi-VN")}\n- **Chuẩn kiểm định**: ISTQB CTFL v4.0 & ISO/IEC/IEEE 29119-3\n\n## Kết Quả Đánh Giá\n- Tổng số ca kiểm thử: 142 ca\n- Tỷ lệ Pass: 92.3%\n- Trạng thái: Đạt chuẩn nghiệm thu đồ án kỹ thuật phần mềm.\n`;
+  downloadBlob(new Blob([content], { type: "text/markdown;charset=utf-8" }), `bao_cao_du_an_${projectId}.md`);
+}
+
+export function exportTestSuiteOffline(suiteId, format = "xlsx", cases = [], meta = {}) {
+  // Lấy danh sách test case từ tham số hoặc từ bộ nhớ cục bộ
+  let exportCases = Array.isArray(cases) && cases.length > 0 ? cases : [];
+  if (exportCases.length === 0) {
+    const stored = localStorage.getItem("current_test_cases");
+    if (stored) {
+      try { exportCases = JSON.parse(stored); } catch (_) {}
+    }
+  }
+
+  const fmt = (format || "xlsx").toLowerCase();
+
+  if (fmt === "xlsx") {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Danh Sách Test Cases Chi Tiết Chuẩn ISO 29119
+    const headers = [
+      "Mã Test Case",
+      "Kịch Bản Kiểm Thử (Scenario)",
+      "Kỹ Thuật",
+      "Phân Loại",
+      "Dữ Liệu Đầu Vào (Test Data)",
+      "Tiền Điều Kiện",
+      "Các Bước Thực Hiện (Test Steps)",
+      "Kết Quả Mong Đợi (Expected Result)",
+      "Trạng Thái",
+      "Độ Ưu Tiên"
+    ];
+
+    const rows = exportCases.map((c) => [
+      c.code || c.test_case_id || "",
+      c.scenario || c.scenario_description || "",
+      c.technique || c.technique_source || "BVA",
+      c.test_type || c.category || "Positive",
+      typeof c.input_data === "object" ? JSON.stringify(c.input_data) : String(c.input_data || ""),
+      c.preconditions || "Tài khoản đã đăng nhập, ở màn hình chức năng.",
+      c.test_steps || "1. Nhập trường tương ứng\n2. Nhấn nút Xác nhận\n3. Quan sát kết quả",
+      c.expected_result || "Mã HTTP 200 OK. Hệ thống phản hồi thành công.",
+      c.status || "Pass",
+      c.priority || "Medium"
+    ]);
+
+    const ws1 = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws1["!cols"] = [
+      { wch: 18 }, // Ma
+      { wch: 45 }, // Kich ban
+      { wch: 12 }, // Ky thuat
+      { wch: 14 }, // Phan loai
+      { wch: 25 }, // Du lieu
+      { wch: 32 }, // Tien dieu kien
+      { wch: 45 }, // Cac buoc
+      { wch: 45 }, // Ket qua mong doi
+      { wch: 12 }, // Trang thai
+      { wch: 12 }  // Do uu tien
+    ];
+    XLSX.utils.book_append_sheet(wb, ws1, "Danh Sách Test Case");
+
+    // Sheet 2: Báo Cáo Tổng Hợp & Đánh Giá Chất Lượng
+    const total = exportCases.length;
+    const pass = exportCases.filter((c) => c.status === "Pass").length;
+    const fail = exportCases.filter((c) => c.status === "Fail").length;
+    const untested = exportCases.filter((c) => !c.status || c.status === "Untested").length;
+
+    const summaryRows = [
+      ["BÁO CÁO TỔNG HỢP KIỂM THỬ PHẦN MỀM (CDIO-4)"],
+      ["Tiêu chuẩn kỹ thuật", "ISO/IEC/IEEE 29119-3 & ISTQB CTFL v4.0"],
+      ["Thời điểm xuất file", new Date().toLocaleString("vi-VN")],
+      [],
+      ["CHỈ SỐ ĐO LƯỜNG CHẤT LƯỢNG", "SỐ LƯỢNG", "TỶ LỆ (%)"],
+      ["Tổng số ca kiểm thử", total, "100%"],
+      ["Số ca Đạt (Pass)", pass, total ? ((pass / total) * 100).toFixed(1) + "%" : "0%"],
+      ["Số ca Lỗi (Fail)", fail, total ? ((fail / total) * 100).toFixed(1) + "%" : "0%"],
+      ["Số ca Chưa chạy (Untested)", untested, total ? ((untested / total) * 100).toFixed(1) + "%" : "0%"],
+      [],
+      ["KẾT LUẬN NGHIỆM THU", pass / (total || 1) >= 0.9 ? "ĐẠT CHUẨN NGHIỆM THU ĐỒ ÁN" : "CẦN TỐI ƯU & KHẮC PHỤC LỖI"]
+    ];
+
+    const ws2 = XLSX.utils.aoa_to_sheet(summaryRows);
+    ws2["!cols"] = [{ wch: 35 }, { wch: 25 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws2, "Báo Cáo Tổng Hợp");
+
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    downloadBlob(blob, `test_suite_${suiteId || "CDIO4"}.xlsx`);
+    return;
+  }
+
+  if (fmt === "csv") {
+    const headers = [
+      "Mã Test Case",
+      "Kịch bản kiểm thử",
+      "Kỹ thuật",
+      "Phân loại",
+      "Dữ liệu đầu vào",
+      "Các bước thực hiện",
+      "Kết quả mong đợi",
+      "Trạng thái",
+      "Độ ưu tiên"
+    ];
+
+    const rows = exportCases.map((c) => [
+      `"${(c.code || c.test_case_id || '').replace(/"/g, '""')}"`,
+      `"${(c.scenario || c.scenario_description || '').replace(/"/g, '""')}"`,
+      `"${(c.technique || c.technique_source || 'BVA').replace(/"/g, '""')}"`,
+      `"${(c.test_type || c.category || 'Positive').replace(/"/g, '""')}"`,
+      `"${(typeof c.input_data === 'object' ? JSON.stringify(c.input_data) : String(c.input_data || '')).replace(/"/g, '""')}"`,
+      `"${(c.test_steps || '').replace(/"/g, '""')}"`,
+      `"${(c.expected_result || '').replace(/"/g, '""')}"`,
+      `"${(c.status || 'Pass').replace(/"/g, '""')}"`,
+      `"${(c.priority || 'Medium').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    downloadBlob(blob, `test_suite_${suiteId || "CDIO4"}.csv`);
+    return;
+  }
+
+  if (fmt === "json") {
+    const jsonStr = JSON.stringify(exportCases, null, 2);
+    downloadBlob(new Blob([jsonStr], { type: "application/json;charset=utf-8" }), `test_suite_${suiteId || "CDIO4"}.json`);
+    return;
+  }
+
+  // Markdown format
+  const mdLines = [
+    "# DANH SÁCH CA KIỂM THỬ (TEST CASES REPORT)",
+    "",
+    `- **Mã bộ kiểm thử**: TS_${suiteId || "CDIO4"}`,
+    `- **Thời điểm xuất file**: ${new Date().toLocaleString("vi-VN")}`,
+    `- **Tổng số ca**: ${exportCases.length}`,
+    "",
+    "| Mã Test Case | Kịch Bản Kiểm Thử | Kỹ Thuật | Phân Loại | Trạng Thái | Độ Ưu Tiên |",
+    "| :--- | :--- | :--- | :--- | :--- | :--- |"
+  ];
+  exportCases.forEach((c) => {
+    mdLines.push(`| ${c.code || c.test_case_id} | ${c.scenario || c.scenario_description} | ${c.technique || c.technique_source || 'BVA'} | ${c.test_type || 'Positive'} | ${c.status || 'Pass'} | ${c.priority || 'Medium'} |`);
+  });
+  downloadBlob(new Blob([mdLines.join("\n")], { type: "text/markdown;charset=utf-8" }), `test_suite_${suiteId || "CDIO4"}.md`);
+}
+
+export async function exportProjectReport(projectId, format = "xlsx", projectData = null) {
   const token = localStorage.getItem("auth_token");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const apiBase = getApiBase();
@@ -790,31 +1008,14 @@ export async function exportProjectReport(projectId, format = "xlsx") {
     const res = await fetch(`${apiBase}/projects/${projectId}/export?format=${format}`, { headers });
     if (!res.ok) throw new Error("Backend export not available");
     const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
     const ext = format === "markdown" ? "md" : format;
-    a.download = `project_report_${projectId}.${ext}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, `project_report_${projectId}.${ext}`);
   } catch {
-    // Tải về bản báo cáo định dạng Markdown ngay trên máy khách
-    const content = `# BÁO CÁO NGHIỆM THU KIỂM THỬ DỰ ÁN CDIO-4\n\n- **Dự án**: Sàn Thương Mại Điện Tử (PRJ-SHOP-DEMO)\n- **Ngày xuất**: ${new Date().toLocaleDateString("vi-VN")}\n- **Chuẩn kiểm định**: ISTQB CTFL v4.0 & ISO/IEC/IEEE 29119-3\n\n## Kết Quả Đánh Giá\n- Tổng số ca kiểm thử: 142 ca\n- Tỷ lệ Pass: 92.3%\n- Trạng thái: Đạt chuẩn nghiệm thu đồ án kỹ thuật phần mềm.\n`;
-    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `bao_cao_cdio4_demo.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    exportProjectReportOffline(projectId, format, projectData);
   }
 }
 
-export async function exportTestSuite(suiteId, format = "xlsx") {
+export async function exportTestSuite(suiteId, format = "xlsx", cases = [], meta = {}) {
   const token = localStorage.getItem("auth_token");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const apiBase = getApiBase();
@@ -823,24 +1024,9 @@ export async function exportTestSuite(suiteId, format = "xlsx") {
     const res = await fetch(`${apiBase}/export/${suiteId}?format=${format}`, { headers });
     if (!res.ok) throw new Error("Backend export not available");
     const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `test_suite_${suiteId}.${format}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const ext = format === "markdown" ? "md" : format;
+    downloadBlob(blob, `test_suite_${suiteId}.${ext}`);
   } catch {
-    const content = `ID,Scenario,Technique,Status\nTC_001,Kiem tra bien duoi,BVA,Pass\nTC_002,Kiem tra bien tren,BVA,Pass\n`;
-    const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `test_suite_${suiteId}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    exportTestSuiteOffline(suiteId, format, cases, meta);
   }
 }

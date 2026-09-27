@@ -29,12 +29,17 @@ export default function TestCaseTable({ result, projectName }) {
   const [activeView, setActiveView] = useState("cases"); // "cases" | "report"
 
   useEffect(() => {
-    setCases(result.test_cases || []);
+    if (result.test_cases) {
+      setCases(result.test_cases);
+      try {
+        localStorage.setItem("current_test_cases", JSON.stringify(result.test_cases));
+      } catch (_) {}
+    }
   }, [result]);
 
   async function handleExport(format) {
     try {
-      await exportTestSuite(test_suite_id, format);
+      await exportTestSuite(test_suite_id, format, cases, result);
     } catch (err) {
       alert("Xuất file thất bại / Export failed: " + err.message);
     }

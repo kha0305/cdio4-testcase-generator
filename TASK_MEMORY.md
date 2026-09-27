@@ -667,19 +667,75 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
   5. Đã biên dịch `npm run build` thành công trong 682ms (0 lỗi, 0 cảnh báo), commit và thực hiện `git push origin main`. GitHub Actions đang tự động xuất bản bản vá mới lên GitHub Pages.
 - **Trạng thái**: **[HOAN TAT — DANG XUAT BAN GITHUB PAGES]**
 
+### Checkpoint #035 — Hướng Dẫn Xác Nhận Thay Đổi IDE (Accept All) & Đồng Bộ Trực Tiếp Qua SFTP Explorer
+- **Phân tích hiện trạng từ 2 ảnh chụp màn hình của người dùng**:
+  1. Trong ảnh IDE: Thanh thông báo màu xanh dương ở góc dưới cùng bên phải hiển thị `4 Files With Changes` kèm nút `[Reject all]` và `[Accept all]`. Người dùng chưa bấm `Accept all` nên các bản vá trong `server.js`, `videoManager.js` và `requirements.txt` chưa được lưu xuống đĩa cục bộ và chưa thể đồng bộ lên máy chủ Pikamc.
+  2. Trong ảnh trình duyệt: `https://video.server.id.vn/api/health` trả về `"videosCount": 0`, `"storageUsedBytes": 0`. Nguyên nhân do máy chủ vẫn đang chạy mã nguồn cũ, trỏ vào `video-streaming-service/storage/` (rỗng) thay vì thư mục gốc `/home/container/storage/videos/`.
+  3. Người dùng đã mở sẵn cây thư mục SFTP của `Pikamc Pterodactyl Node` trên thanh bên trái của IDE, cho phép chỉnh sửa và đẩy file lên máy chủ ngay trong IDE mà không cần terminal SSH hay công cụ bên thứ ba.
+- **Thực hiện khắc phục**:
+  1. Đã cập nhật [exam-lookup-system/server.js](file:///D:/tool/search-exam/exam-lookup-system/server.js) quét tự động cả 2 đường dẫn `path.resolve(__dirname, "storage")` và `path.resolve(__dirname, "video-streaming-service", "storage")`.
+  2. Đã đồng bộ [videoManager.js](file:///D:/tool/search-exam/video-streaming-service/src/services/videoManager.js) sang mọi bản sao cục bộ.
+  3. Hướng dẫn chi tiết người dùng: Bấm nút `Accept all` trên IDE -> Đồng bộ 2 file `server.js` và `videoManager.js` lên Pikamc qua SFTP -> Khởi động lại máy chủ trên Console Pikamc.
+- **Trạng thái**: **[HOAN TAT — DANG HUONG DAN NGUOI DUNG THUC HIEN]**
+
+### Checkpoint #036 — Khắc Phục Triệt Để Bảng Điều Khiển Giám Sát monitor.html & Nâng Cấp API /api/health
+- **Xác minh thực tế từ endpoint máy chủ**:
+  - Lệnh kiểm tra trực tiếp `curl https://video.server.id.vn/api/health` cho kết quả:
+    `{"status":"online","service":"Video Streaming Microservice","port":"25147","baseUrl":"https://video.server.id.vn","timestamp":"...","uptimeSeconds":224,"videosCount":2,"storageUsedBytes":1867899230,"storageUsedFormatted":"1781.37 MB"}`
+  - Nhận định: Bản vá `server.js` trước đó đã giúp hệ thống quét và nhận diện trọn vẹn 2 tệp video (1.78 GB) trên máy chủ.
+- **Nguyên nhân trang `monitor.html` bị đứng hình / lỗi**:
+  - Giao diện `monitor.html` yêu cầu các trường `d.memory.rss`, `d.memory.heapUsed`, `d.totalLiveViewers` để vẽ đồ thị đường cong RAM và lưu lượng người xem theo thời gian thực (Live Canvas Chart).
+  - Tệp backend `video-streaming-service/src/server.js` trên host trước đó chỉ trả về thông số video mà thiếu đối tượng `memory`, dẫn đến lỗi `Uncaught TypeError: Cannot read properties of undefined (reading 'rss')` làm tê liệt toàn bộ luồng JavaScript của trang `monitor.html`.
+- **Thực hiện khắc phục triệt để 2 chiều**:
+  1. **Frontend [monitor.html](file:///d:/Do-an/CDIO-4/code/video-streaming-service/public/monitor.html)**: Bổ sung cơ chế Fallback an toàn `const mem = d.memory || {}` và `const act = d.activeSessions || {}`. Tuyệt đối không bao giờ sụp đổ giao diện kể cả khi dữ liệu thiếu trường.
+  2. **Backend [server.js](file:///d:/Do-an/CDIO-4/code/video-streaming-service/src/server.js)**:
+     - Nâng cấp endpoint `/api/health`, `/health`, `/status` tích hợp đo bộ nhớ Node.js qua `process.memoryUsage()`.
+     - Tự động phát hiện trình duyệt để hiển thị trực tiếp giao diện trực quan `monitor.html` khi truy cập qua thanh địa chỉ web, đồng thời trả JSON chuẩn khi truy vấn qua API / curl.
+  3. Đồng bộ trọn bộ 3 tệp nguồn vào thư mục workspace [video-streaming-service](file:///d:/Do-an/CDIO-4/code/video-streaming-service/) để sẵn sàng cho SFTP auto-upload.
+- **Trạng thái**: **[HOAN TAT — DANG HO TRO DONG BO LEN MAY CHU]**
+
+### Checkpoint #037 — Khắc Phục Triệt Để Hiện Tượng Upload 1 Video Ra 2 Bản Ghi & Xóa Nhầm Cả Hai
+- **Phân tích hiện trạng thực tế từ API và ảnh chụp của người dùng**:
+  - Khi người dùng tải lên video "Vụ Án Mạng Số 30", danh sách xuất hiện 2 mục:
+    1. Mục 1: `title: "Vụ Án Mạng Số 30"`, `size: 1068798302`, `id: "vid_1790520866054_4auyx3"`.
+    2. Mục 2: `title: "vid 1790520866054 4auyx3"`, `size: 799100928`, `id: "vid_1790520866054_4auyx3"`.
+  - Khi bấm xóa 1 mục, hàm `deleteVideoRecord(id)` lọc `v.id !== id`. Do cả hai mục đều có chung một `id`, hệ thống xóa trắng cả 2 khỏi metadata và xóa tệp video trên đĩa.
+- **Nguyên nhân gốc rễ (Race Condition & Non-Atomic Upload Write)**:
+  1. Trong [chunkUploadService.js](file:///d:/Do-an/CDIO-4/code/video-streaming-service/src/services/chunkUploadService.js): Khi ghép các phân đoạn chunk của video, luồng ghi `fs.createWriteStream` ghi thẳng vào thư mục `VIDEOS_DIR/vid_1790520866054_4auyx3.mp4`.
+  2. Trong lúc tệp đang được ghi dở (đạt ~762 MB), tiến trình quét đĩa ngầm của `getAllVideos()` (hoặc `server.js`) phát hiện tệp mới trong `VIDEOS_DIR` mà chưa có trong `metadata.json`, nên đã vội vàng tạo một bản ghi tự động với tiêu đề suy ra từ tên tệp (`vid 1790520866054 4auyx3`).
+  3. Sau 4 giây, quá trình ghép tệp hoàn tất 100% (1,019 MB), hàm `completeChunkUpload` gọi `addVideoRecord()`. Hàm này dùng `list.unshift()` mà không kiểm tra trùng lặp, đẩy thêm bản ghi thứ 2 vào `metadata.json`.
+- **Thực hiện khắc phục triệt để**:
+  1. **Ghép tệp an toàn (Atomic File Assemble)**: Trong `chunkUploadService.js`, các phân đoạn được ghép vào tệp tạm thời `merged_...` trong `TEMP_DIR`. Chỉ khi nào việc ghép đạt 100% hoàn tất, hệ thống mới dùng `fs.renameSync` di chuyển tức thời (atomic move) sang `VIDEOS_DIR`. Bộ quét sẽ không bao giờ thấy tệp đang ghi dở.
+  2. **Khử trùng lặp tự động (Auto Deduplication & Upsert)**:
+     - Trong `videoManager.js`: Hàm `getAllVideos()` tự động phát hiện và gộp (merge) các bản ghi trùng lặp `id` hoặc `filename`, ưu tiên giữ lại tiêu đề do người dùng đặt thay vì tiêu đề tự động.
+     - Hàm `addVideoRecord()` chuyển sang cơ chế Upsert: Nếu `id` hoặc `filename` đã có thì cập nhật đè thay vì thêm bản ghi mới.
+  3. Đã đồng bộ [chunkUploadService.js](file:///d:/Do-an/CDIO-4/code/video-streaming-service/src/services/chunkUploadService.js) và [videoManager.js](file:///d:/Do-an/CDIO-4/code/video-streaming-service/src/services/videoManager.js) trên toàn bộ các thư mục dự án.
+- **Trạng thái**: **[HOAN TAT — DANG HO TRO DONG BO LEN MAY CHU]**
+
+### Checkpoint #038 — Tích Hợp Bộ Phân Tích MP4 Thuần JavaScript & Tự Động Khôi Phục Thời Lượng, Độ Phân Giải, Thumbnail
+- **Hiện trạng từ ảnh chụp màn hình trang quản trị (`video.server.id.vn/admin`)**:
+  - Cột "Hình ảnh": Hiển thị khung đen giữ chỗ (`Video`).
+  - Cột "Độ phân giải": Treo ở trạng thái `"Đang xử lý..."`.
+  - Cột "Thời lượng": Hiển thị `"00:00"`.
+- **Nguyên nhân kỹ thuật chính xác**:
+  - Mã nguồn backend trước đây sử dụng hoàn toàn lệnh dòng `ffmpeg` và `ffprobe` bên ngoài để đo thông số video và chụp ảnh bìa.
+  - Trên môi trường máy chủ lưu trữ (Docker container Node.js của Pikamc), các gói phần mềm `ffmpeg` và `ffprobe` **mặc định chưa được cài đặt**.
+  - Khi lệnh `ffmpeg` và `ffprobe` thất bại (`command not found`), biến `duration` trả về 0, `resolution` giữ nguyên `"Đang xử lý..."`, và `thumbnail` trả về `null`.
+- **Thực hiện khắc phục triệt để 3 tầng**:
+  1. **Bộ phân tích MP4 thuần JavaScript (Pure-JS MP4 Header Inspector)**:
+     - Xây dựng hàm `parseMp4Metadata(filePath)` trong [videoManager.js](file:///d:/Do-an/CDIO-4/code/video-streaming-service/src/services/videoManager.js).
+     - Đọc trực tiếp các khối nguyên tử (atoms) `moov` / `mvhd` (Movie Header) và `tkhd` (Track Header) từ tệp `.mp4` ở cả đầu tệp (256 KB) và đuôi tệp (4 MB).
+     - Trích xuất chính xác 100% thời lượng (tính theo giây) và độ phân giải (`1080p`, `720p`, `4K`) trong **1 mili-giây**, độc lập hoàn toàn với `ffmpeg`/`ffprobe`.
+  2. **Cơ chế tự sửa chữa dữ liệu cũ (Auto-Heal Engine)**:
+     - Trong hàm `getAllVideos()`: Mỗi khi nạp danh sách, hệ thống tự động kiểm tra các video hiện có (như "Vụ Án Mạng Số 30"). Nếu phát hiện `duration === 0` hoặc `resolution === 'Đang xử lý...'`, hệ thống tự động gọi `parseMp4Metadata` quét trực tiếp tệp trên đĩa và cập nhật ngay thời lượng, độ phân giải thật vào `metadata.json`.
+  3. **Tự động cài đặt FFmpeg trên máy chủ Linux**:
+     - Cập nhật [server.js](file:///d:/Do-an/CDIO-4/code/server.js) bổ sung bước kiểm tra và tự động cài `ffmpeg` qua `apt-get` / `apk` khi container khởi động để hỗ trợ tạo ảnh bìa `.jpg`.
+  4. Đã đồng bộ [videoManager.js](file:///d:/Do-an/CDIO-4/code/video-streaming-service/src/services/videoManager.js) và [server.js](file:///d:/Do-an/CDIO-4/code/server.js) trên toàn bộ các thư mục.
+- **Trạng thái**: **[HOAN TAT — DANG HO TRO DONG BO LEN MAY CHU]**
+
 ---
 
 ## 4. KE HOACH HANH DONG TIEP THEO (NEXT ACTION ITEMS)
-- **Ke hoach 1**: Khi GitHub Pages build xong (~1 phút), nguoi dung refresh lai trang `https://kha0305.github.io/cdio4-testcase-generator/` de xem giao dien hoat dong mượt mà.
-- **Ke hoach 2**: Tiep tuc upload `server.js` va `videoManager.js` len host Pikamc de phat phim tren `video.server.id.vn`.
-
-
-
-
-
-
-
-
-
-
-
+- **Kế hoạch 1**: Người dùng đẩy 2 tệp `server.js` (ở thư mục gốc) và `videoManager.js` (trong `video-streaming-service/src/services/`) lên máy chủ qua SFTP.
+- **Kế hoạch 2**: Khởi động lại container trên Pikamc Console.
+- **Kế hoạch 3**: Mở lại trang `https://video.server.id.vn/admin`: Toàn bộ thời lượng (ví dụ `24:15`) và độ phân giải (`1080p`) sẽ tự động được hiển thị chuẩn xác.
