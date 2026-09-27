@@ -1,30 +1,60 @@
-# HỆ THỐNG TỰ ĐỘNG SINH TEST CASE (CDIO-4)
-## Automated Test Case Generation Platform — BVA, Equivalence Partitioning, Pairwise & SMT Z3 Solver
+<div align="center">
+  <img src="docs/assets/banner.svg" alt="CDIO-4 AutoTest Studio Banner" width="100%" />
+  <br /><br />
 
-Hệ thống hỗ trợ tự động bóc tách ngữ nghĩa từ tài liệu đặc tả yêu cầu phần mềm (Software Requirements Specification / User Stories) và tự động sinh bộ ca kiểm thử (Test Cases) chất lượng cao đạt chuẩn quốc tế **ISTQB CTFL v4.0** và **ISO/IEC/IEEE 29119-3**. Dự án được xây dựng theo mô hình Monorepo kết hợp động cơ toán học hình thức, quản trị quy trình Agile/Scrum và giao diện Studio chuyên nghiệp.
+  <p align="center">
+    <strong>Nền tảng Tự Động Bóc Tách Đặc Tả &amp; Sinh Ca Kiểm Thử Phần Mềm Chuẩn Quốc Tế</strong><br />
+    Tuân thủ quy chuẩn <strong>ISTQB CTFL v4.0</strong> &bull; Mô hình phân cấp mã <strong>ISO/IEC/IEEE 29119-3</strong> &bull; Động cơ <strong>Microsoft Z3 SMT Solver</strong>
+  </p>
+
+  <p align="center">
+    <a href="#1-tổng-quan-đề-tài--vấn-đề-giải-quyết"><strong>Tổng Quan</strong></a> &bull;
+    <a href="#2-các-tính-năng-kỹ-thuật-nổi-bật"><strong>Tính Năng</strong></a> &bull;
+    <a href="#3-công-nghệ-sử-dụng-tech-stack"><strong>Kiến Trúc</strong></a> &bull;
+    <a href="#4-sơ-đồ-cấu-trúc-thư-mục-monorepo"><strong>Cấu Trúc Thư Mục</strong></a> &bull;
+    <a href="#5-hướng-dẫn-cài-đặt--khởi-chạy-nhanh-quick-start"><strong>Khởi Chạy Nhanh</strong></a> &bull;
+    <a href="#6-tài-khoản-mẫu--dữ-liệu-đồ-án-trải-nghiệm"><strong>Tài Khoản Mẫu</strong></a> &bull;
+    <a href="#7-kiểm-thử-tích-hợp-tự-động-1818-bước-pass-100"><strong>Kiểm Thử (18/18 Pass)</strong></a> &bull;
+    <a href="#8-quy-chuẩn-phát-triển--chống-sự-cố-agentsmd--task_memorymd"><strong>Quy Chuẩn AGENTS.md</strong></a>
+  </p>
+
+  <p align="center">
+    <a href="https://github.com/kha0305/cdio4-testcase-generator"><img src="https://img.shields.io/badge/Monorepo-Fullstack-0F172A?style=flat-square&logo=github" alt="Monorepo" /></a>
+    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+" /></a>
+    <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.110%2B-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
+    <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18" /></a>
+    <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-5.x-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 5" /></a>
+    <a href="https://github.com/Z3Prover/z3"><img src="https://img.shields.io/badge/Solver-Microsoft_Z3-7C3AED?style=flat-square" alt="Microsoft Z3" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/Kiểm_Thử-18%2F18_Pass_(100%25)-16A34A?style=flat-square" alt="Tests 18/18 Pass" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/Giấy_Phép-MIT-2563EB?style=flat-square" alt="MIT License" /></a>
+  </p>
+</div>
 
 ---
 
-## 1. TỔNG QUAN DỰ ÁN & VẤN ĐỀ GIẢI QUYẾT
+## 1. TỔNG QUAN ĐỀ TÀI & VẤN ĐỀ GIẢI QUYẾT
 
-Trong quy trình phát triển phần mềm truyền thống, việc thiết kế Test Case thủ công gặp phải các rào cản lớn:
-- **Tốn kém thời gian & nguồn lực**: Kỹ sư kiểm thử phải phân tích từng câu chữ, tự tính toán điểm biên (Boundary) và các phân vùng tương đương.
-- **Dễ sót lỗi tổ hợp**: Khi có nhiều trường tham số đầu vào, số lượng tổ hợp khả dĩ bùng nổ theo cấp số nhân khiến kiểm thử viên dễ bỏ sót các tương tác ẩn giữa các trường.
-- **Dữ liệu giả lập cẩu thả (Vibe Coding / Dummy Data)**: Các công cụ tự động thông thường thường sinh chuỗi vô nghĩa (`"test_value"`, `"abc"`, chuỗi ngẫu nhiên vô nghĩa) không phản ánh đúng ngữ cảnh nghiệp vụ (họ tên người Việt, email hợp lệ, định dạng số điện thoại, mã OTP, tiền tệ VNĐ).
+### 1.1. Thách thức trong thiết kế kiểm thử truyền thống
+Trong quy trình phát triển phần mềm theo tiêu chuẩn công nghiệp, hoạt động thiết kế ca kiểm thử (Test Case Design) thủ công thường gặp phải các hạn chế nghiêm trọng:
+- **Tốn kém thời gian & nguồn lực kỹ sư**: Việc đọc hiểu tài liệu đặc tả, tính toán thủ công các điểm ranh giới nhạy cảm lỗi (Boundary Values) và phân chia các phân vùng tương đương thường chiếm từ 30% đến 40% tổng thời lượng dự án.
+- **Dễ sót lỗi tổ hợp đa biến**: Khi số lượng trường tham số đầu vào tăng lên, số lượng kịch bản vét cạn (Exhaustive Testing) bùng nổ theo cấp số nhân, khiến kiểm thử viên dễ bỏ lỡ các lỗi phát sinh do sự tương tác đồng thời giữa 2 hoặc nhiều tham số.
+- **Dữ liệu giả lập cẩu thả (Vibe Coding / Dummy Data)**: Các công cụ sinh tự động thông thường có xu hướng chèn chuỗi rác (`"test_123"`, `"abc"`, `"foo"`, chuỗi ngẫu nhiên vô nghĩa), làm sai lệch hành vi của tầng nghiệp vụ và không phát hiện được lỗi định dạng thực tế (họ tên tiếng Việt có dấu, đầu số viễn thông Việt Nam, chuẩn email RFC 5322, mã OTP 6 chữ số, tiền tệ VNĐ).
 
-**Giải pháp của CDIO-4 AutoTest**:
+### 1.2. Giải pháp kỹ thuật của CDIO-4 AutoTest
 Hệ thống kết hợp mô hình xử lý ngôn ngữ tự nhiên (NLP Parameter Extraction) với các động cơ toán học và thuật toán kiểm thử phần mềm chuyên nghiệp:
-1. **Phân tích Giá trị Biên (Boundary Value Analysis - BVA)**: Tự động xác định 6 điểm biên nhạy cảm lỗi: `Min - 1`, `Min`, `Min + 1`, `Max - 1`, `Max`, `Max + 1`.
-2. **Phân Vùng Tương Đương (Equivalence Partitioning - EP)**: Phân rã miền dữ liệu thành 1 phân vùng hợp lệ (Valid) và các phân vùng không hợp lệ (Invalid).
+1. **Phân tích Giá trị Biên (Boundary Value Analysis - BVA)**: Tự động tính toán chuẩn xác 6 điểm biên ranh giới nhạy cảm lỗi: `Min - 1`, `Min`, `Min + 1`, `Max - 1`, `Max`, `Max + 1`.
+2. **Phân Vùng Tương Đương (Equivalence Partitioning - EP)**: Phân tách không gian đầu vào thành 1 phân vùng hợp lệ danh định (Valid / Nominal) và các phân vùng không hợp lệ (Invalid Robustness).
 3. **Kiểm Thử Tổ Hợp Cặp (Pairwise / All-Pairs Testing)**: Sinh ma trận tổ hợp trực giao nhằm bao phủ 100% các cặp tương tác 2 chiều với số lượng ca kiểm thử tối thiểu (giảm 70% - 85% số ca so với kiểm thử vét cạn).
 4. **Bộ Giải Ràng Buộc Hình Thức (Z3 SMT Solver - Microsoft Research)**: Tự động tìm nghiệm thỏa mãn hệ thống phương trình và bất đẳng thức ràng buộc logic phức tạp giữa các tham số nghiệp vụ.
 5. **Bộ Tổng Hợp Ngữ Cảnh Thực Tế (Context-Aware Synthesizer)**: Tự động nhận diện trường dữ liệu để sinh thông tin chuẩn văn hóa và định dạng thực tế tại Việt Nam.
+
+[Quay lại đầu trang](#)
 
 ---
 
 ## 2. CÁC TÍNH NĂNG KỸ THUẬT NỔI BẬT
 
-### 2.1. Động Cơ Sinh Test Case Đạt Chuẩn Senior QA (Anti-Vibe Coder)
+### 2.1. Động cơ sinh Test Case chuẩn Senior QA (Anti-Vibe Coder)
 - **Mã định danh phân cấp chuẩn ISO/IEC/IEEE 29119**: Cấu trúc mã hóa rõ ràng theo cú pháp `TC_[MODULE]_[TECH]_[SEQ]` (Ví dụ: `TC_AUTH_BVA_001`, `TC_ORDER_EP_004`, `TC_PAY_PW_008`, `TC_CART_Z3_002`).
 - **Mô tả kịch bản có ngữ cảnh nghiệp vụ sâu sắc**: Nêu rõ hành vi người dùng, kỹ thuật kiểm thử áp dụng và mục tiêu đánh giá hệ thống.
 - **Quy trình thực hiện chi tiết từng bước (5 Steps)**: Mô tả tỉ mỉ từ khâu điều hướng màn hình, nhập dữ liệu từng trường, giữ giá trị danh định, nhấn nút hành động đến ghi nhận phản hồi.
@@ -35,26 +65,26 @@ Hệ thống kết hợp mô hình xử lý ngôn ngữ tự nhiên (NLP Paramet
   - Trạng thái toàn vẹn cơ sở dữ liệu (Ghi nhận thành công hoặc tự động Rollback giao dịch, không tạo bản ghi rác).
 - **Tuân thủ nguyên lý Single Fault Assumption (ISTQB)**: Trong mọi ca kiểm thử Negative, chỉ có duy nhất 1 trường mang giá trị không hợp lệ, tất cả các trường còn lại giữ ở giá trị danh định hợp lệ (Nominal Value) để triệt tiêu hiện tượng che giấu lỗi (Defect Masking).
 
-### 2.2. Bóc Tách Ngữ Nghĩa Tham Số & Ràng Buộc Tự Động (NLP Engine)
+### 2.2. Bóc tách ngữ nghĩa tham số & ràng buộc tự động (NLP Engine)
 - Người dùng chỉ cần dán nội dung User Story hoặc tài liệu đặc tả chức năng bằng tiếng Việt.
 - Hệ thống tự động trích xuất danh sách tham số, xác định kiểu dữ liệu (`integer`, `float`, `string`, `email`, `phone`, `enum`), khoảng giá trị `[min, max]`, độ dài chuỗi và danh sách giá trị tùy chọn.
 
-### 2.3. Quản Trị Chu Kỳ Agile / Scrum & Tiêu Chuẩn Hoàn Thành (Definition of Done - DoD)
+### 2.3. Quản trị chu kỳ Agile / Scrum & Tiêu chuẩn hoàn thành (DoD)
 - Quản trị chu kỳ Sprint theo chuẩn khung Agile/Scrum quốc tế.
 - Tự động đo lường tỷ lệ hoàn thành Definition of Done (DoD) dựa trên tiến độ kiểm thử và tỷ lệ Pass/Fail của từng chức năng.
 
-### 2.4. Phân Quyền Dự Án 3 Cấp (Role-Based Access Control - RBAC)
+### 2.4. Phân quyền dự án 3 cấp (RBAC) & Mã Join Code
 - **Cơ chế đăng ký bình đẳng**: Bất kỳ người dùng nào cũng có thể đăng ký tài khoản và tự tạo dự án.
 - **Trưởng nhóm (Leader)**: Người tạo dự án mặc định nắm quyền Trưởng nhóm; có toàn quyền phê duyệt thành viên, thăng cấp/hạ cấp và xóa thành viên khỏi dự án.
 - **Phó nhóm (Sub-Leader)**: Hỗ trợ Trưởng nhóm quản lý chu kỳ Sprint, điều phối ca kiểm thử.
 - **Thành viên (Member)**: Tham gia thực hiện các ca kiểm thử và cập nhật kết quả kiểm định.
 - Gia nhập dự án nhanh chóng bằng **Mã Tham Gia Nhóm (Join Code)**.
 
-### 2.5. Lịch Phân Công Nhiệm Vụ (Calendar & Task Allocation)
+### 2.5. Lịch phân công nhiệm vụ kiểm thử (Calendar View)
 - Giao diện trực quan theo dõi lịch trình kiểm thử theo ngày.
 - Bảng phân công ca kiểm thử cụ thể cho từng thành viên trong nhóm, cập nhật trạng thái tiến độ thời gian thực.
 
-### 2.6. Xuất Bản Báo Cáo Nghiệm Thu 4 Định Dạng
+### 2.6. Xuất bản báo cáo nghiệm thu 4 định dạng
 - **Excel (.xlsx)**: Báo cáo chuyên nghiệp 4 Sheet được tự động định dạng và kẻ bảng:
   - Sheet 1: Tổng quan dự án, KPI, tỷ lệ hoàn thành DoD.
   - Sheet 2: Danh sách toàn bộ Test Cases chi tiết (Tiền điều kiện, Các bước thực hiện, Kết quả mong đợi 4 chiều).
@@ -64,7 +94,7 @@ Hệ thống kết hợp mô hình xử lý ngôn ngữ tự nhiên (NLP Paramet
 - **JSON**: Cấu trúc dữ liệu RESTful phục vụ tích hợp CI/CD Pipeline.
 - **Markdown**: Báo cáo tài liệu kỹ thuật có thể nhúng trực tiếp vào Git Repository.
 
-### 2.7. Trung Tâm Tài Liệu & Kiến Thức Kỹ Thuật Tích Hợp (32 Chuyên Mục)
+### 2.7. Trung tâm tài liệu & kiến thức kỹ thuật tích hợp (32 chuyên mục)
 - Menu cây xổ xuống 2 cấp (Accordion Navigation) chia nhỏ thành 32 bài viết chuyên sâu:
   - Cài đặt & khởi chạy môi trường Node.js / Python.
   - Mạng căn bản: IPv4 vs IPv6, Public vs Private IP, cơ chế 127.0.0.1 vs 0.0.0.0, rào cản CGNAT tại Việt Nam, bảng tra cứu cổng mạng (0 - 65535).
@@ -75,39 +105,36 @@ Hệ thống kết hợp mô hình xử lý ngôn ngữ tự nhiên (NLP Paramet
   - Quy chuẩn Git Flow và nguyên lý động cơ kiểm thử (BVA, EP, Z3).
 - Tích hợp bộ nút chuyển bài Trước / Tiếp theo (Compact Docs Pager) và nút sao chép lệnh 1-Click.
 
+[Quay lại đầu trang](#)
+
 ---
 
 ## 3. CÔNG NGHỆ SỬ DỤNG (TECH STACK)
 
-### Tầng Máy Chủ & Động Cơ Thuật Toán (Backend)
-- **Ngôn ngữ**: Python 3.10+
-- **Web Framework**: FastAPI (Bất đồng bộ ASGI, tự động sinh tài liệu Swagger UI & ReDoc)
-- **Động cơ Toán học**: Z3 Theorem Prover (Microsoft Research SMT Solver)
-- **Cơ sở Dữ liệu**: SQLite cấu hình chế độ WAL (Write-Ahead Logging) cho tốc độ đọc/ghi đồng thời cực cao
-- **ORM**: SQLAlchemy 2.0
-- **Bảo mật & Mã hóa**: Passlib Bcrypt (Hash 12 rounds), JSON Web Token (JWT)
-- **Xuất bản Dữ liệu**: OpenPyXL (Tạo bảng tính Excel đa tầng)
+| Phân tầng | Công nghệ / Thư viện | Vai trò & Mục đích sử dụng |
+| :--- | :--- | :--- |
+| **Backend Framework** | Python 3.10+, FastAPI | Máy chủ API RESTful bất đồng bộ hiệu năng cao (ASGI) |
+| **Động cơ Toán học SMT** | Microsoft Z3 Theorem Prover | Giải hệ phương trình và bất đẳng thức ràng buộc logic hình thức |
+| **Cơ sở Dữ liệu & ORM** | SQLite WAL Mode, SQLAlchemy 2.0 | Lưu trữ giao dịch ACID, chế độ Write-Ahead Logging tốc độ cao |
+| **Bảo mật & Xác thực** | Passlib (Bcrypt 12 rounds), JWT | Mã hóa mật khẩu một chiều, cấp Token xác thực phân quyền 3 cấp |
+| **Xuất Bản Báo Cáo** | OpenPyXL | Tự động tạo bảng tính Excel 4 Sheet chuyên nghiệp |
+| **Frontend Framework** | React 18, Vite 5 | Giao diện Single Page Application (SPA), thời gian build < 300ms |
+| **Design System** | Vanilla CSS, Design Tokens | Không phụ thuộc framework CSS cồng kềnh, hỗ trợ Light/Dark Mode |
+| **Typography** | Times New Roman & JetBrains Mono | Chuẩn mực học thuật, êm dịu cho mắt khi đọc tài liệu dài |
+| **Biểu tượng (Icons)** | Inline SVG Icons | 100% icon SVG chuẩn mực kỹ thuật (Tuyệt đối không dùng Unicode Emoji) |
 
-### Tầng Giao Diện Người Dùng (Frontend)
-- **Framework**: React 18
-- **Công cụ Biên dịch**: Vite 5 (Thời gian build siêu tốc < 300ms)
-- **Hệ thống Tạo kiểu (CSS)**: Vanilla CSS với Design Tokens đồng bộ, hỗ trợ Chế độ Sáng / Tối (Light/Dark Mode)
-- **Typography**: Phông chữ chính **Times New Roman** (chuẩn mực học thuật, êm dịu cho mắt khi đọc tài liệu dài), kết hợp **JetBrains Mono** cho khối lệnh terminal và mã nguồn
-- **Hệ thống Icon**: 100% SVG Icons chuẩn mực (không dùng Unicode Emoji theo quy định AGENTS.md)
-- **Thanh cuộn**: Custom Slim Scrollbar siêu mỏng 5px bo góc hiện đại
+[Quay lại đầu trang](#)
 
 ---
 
-## 4. CẤU TRÚC THƯ MỤC MONOREPO
-
-Dự án được tổ chức theo chuẩn kiến trúc Monorepo quốc tế sạch sẽ và độc lập:
+## 4. SƠ ĐỒ CẤU TRÚC THƯ MỤC MONOREPO
 
 ```text
 cdio4-testcase-generator/
 ├── backend/                   # Tầng máy chủ & Động cơ thuật toán (Python FastAPI)
 │   ├── engine/                # Các bộ sinh kiểm thử: Z3 Solver, BVA, Equivalence, Pairwise, Synthesizer
 │   │   ├── assembler.py       # Lắp ráp kịch bản kiểm thử hoàn chỉnh
-│   │   ├── bva.py             # Động cơ phân tích giá trị biên
+│   │   ├── bva.py             # Động cơ phân tích giá trị biên (6 điểm biên)
 │   │   ├── constraint_solver.py # Bộ giải ràng buộc Z3 SMT
 │   │   ├── equivalence.py     # Động cơ phân vùng tương đương
 │   │   ├── pairwise.py        # Động cơ tổ hợp trực giao All-Pairs
@@ -138,6 +165,8 @@ cdio4-testcase-generator/
 │   ├── package.json           # Quản lý thư viện phụ thuộc Frontend
 │   └── vite.config.js         # Cấu hình Vite Dev Server & Build
 ├── docs/                      # Tài liệu kỹ thuật, hướng dẫn & khảo sát
+│   ├── assets/                # Hình ảnh đồ họa & Banner dự án
+│   │   └── banner.svg         # Banner vector SVG kỹ thuật chuẩn của dự án
 │   ├── HUONG_DAN_CAI_DAT_VA_KHOI_CHAY.md
 │   ├── HUONG_DAN_GIT_QUY_TRINH_PHAT_TRIEN.md
 │   ├── HUONG_DAN_DOCKER_VA_CLOUDFLARE_TUNNEL.md
@@ -165,16 +194,18 @@ cdio4-testcase-generator/
 └── README.md                  # Tài liệu hướng dẫn này
 ```
 
+[Quay lại đầu trang](#)
+
 ---
 
-## 5. HƯỚNG DẪN CÀI ĐẶT & KHỞI CHẠY (QUICK START)
+## 5. HƯỚNG DẪN CÀI ĐẶT & KHỞI CHẠY NHANH (QUICK START)
 
-### Yêu Cầu Tiên Quyết
+### Yêu cầu tiên quyết
 - **Node.js**: Phiên bản 18.x hoặc 20.x LTS trở lên.
 - **Python**: Phiên bản 3.10, 3.11 hoặc 3.12 (Khi cài đặt trên Windows, bắt buộc phải tích chọn ô **"Add Python to PATH"**).
-- **Git**: Đã cài đặt trên máy.
+- **Git**: Đã cài đặt trên máy tính.
 
-### Cách 1: Khởi Chạy Nhanh Bằng Kịch Bản 1-Click (Dành cho Windows)
+### Cách 1: Khởi chạy 1-Click trên Windows
 1. **Cài đặt thư viện phụ thuộc**:
    Nhấp đúp chuột vào tệp `cai_dat.bat` hoặc mở Terminal chạy:
    ```cmd
@@ -187,7 +218,7 @@ cdio4-testcase-generator/
    ```
    Hệ thống sẽ đồng thời kích hoạt Backend tại cổng `8000` và Frontend tại cổng `5173`.
 
-### Cách 2: Khởi Chạy Bằng Lệnh Monorepo (Windows / macOS / Linux)
+### Cách 2: Khởi chạy bằng lệnh Monorepo chuẩn (Windows / macOS / Linux)
 1. **Cài đặt toàn bộ thư viện (Cả Backend & Frontend)**:
    ```bash
    npm run install:all
@@ -196,8 +227,11 @@ cdio4-testcase-generator/
    ```bash
    npm run dev
    ```
-3. Mở trình duyệt truy cập: **`http://localhost:5173`**
-   - Tài liệu Swagger API Backend có sẵn tại: **`http://localhost:8000/docs`**
+3. Mở trình duyệt truy cập:
+   - Giao diện người dùng: **`http://localhost:5173`**
+   - Tài liệu Swagger UI Backend: **`http://localhost:8000/docs`**
+
+[Quay lại đầu trang](#)
 
 ---
 
@@ -218,9 +252,11 @@ Nếu muốn nạp lại dữ liệu mẫu chuẩn gồm 3 Chức năng, 2 Sprin
 python migrate_db.py
 ```
 
+[Quay lại đầu trang](#)
+
 ---
 
-## 7. KIỂM THỬ TÍCH HỢP TỰ ĐỘNG (SYSTEM TEST SUITE)
+## 7. KIỂM THỬ TÍCH HỢP TỰ ĐỘNG (18/18 BƯỚC PASS 100%)
 
 Dự án sở hữu bộ kiểm thử tích hợp đầu-cuối (End-to-End Integration Test) độc lập gồm **18 bước tự động hóa**, kiểm tra toàn diện tất cả các phân hệ:
 ```bash
@@ -229,7 +265,7 @@ npm test
 python run_system_test.py
 ```
 
-**Các phân hệ được kiểm định tự động**:
+**Danh sách 18 bước kiểm thử tự động**:
 1. Đăng ký tài khoản người dùng bình đẳng (Auth Register).
 2. Đăng nhập và xác thực cấp Token JWT.
 3. Cập nhật hồ sơ người dùng cá nhân (Profile Update).
@@ -249,6 +285,8 @@ python run_system_test.py
 17. Xuất bản báo cáo cấu trúc dữ liệu JSON.
 18. Xuất bản báo cáo kỹ thuật định dạng Markdown.
 
+[Quay lại đầu trang](#)
+
 ---
 
 ## 8. QUY CHUẨN PHÁT TRIỂN & CHỐNG SỰ CỐ (AGENTS.MD & TASK_MEMORY.MD)
@@ -258,6 +296,8 @@ Dự án áp dụng các nguyên tắc kỹ thuật nghiêm ngặt được quy 
 - **Tiếng Việt có dấu chuẩn xác 100%**: Áp dụng từ nhãn giao diện, kịch bản kiểm thử, đến cấu trúc báo cáo xuất ra.
 - **Quy chuẩn Checkpoint chống sự cố (TASK_MEMORY.md)**: Mọi thao tác phát triển đều tuân thủ quy trình 3 bước (Đọc trước - Ghi Checkpoint trước khi sửa - Cập nhật hoàn tất sau khi kiểm thử) để triệt tiêu nguy cơ đứt gãy tiến độ khi gặp sự cố crash hoặc gián đoạn phiên làm việc.
 
+[Quay lại đầu trang](#)
+
 ---
 
 ## 9. GIẤY PHÉP & TÁC GIẢ
@@ -265,3 +305,5 @@ Dự án áp dụng các nguyên tắc kỹ thuật nghiêm ngặt được quy 
 - **Đồ án môn học**: CDIO-4 — Chuyên ngành Kỹ thuật Phần mềm / Công nghệ Thông tin.
 - **Kho lưu trữ GitHub**: [https://github.com/kha0305/cdio4-testcase-generator](https://github.com/kha0305/cdio4-testcase-generator)
 - **Giấy phép**: MIT License.
+
+[Quay lại đầu trang](#)
