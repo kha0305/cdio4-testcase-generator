@@ -652,66 +652,86 @@ export async function generateTestCases(requirementId, parameters, techniques, c
       const max = p.max_val ?? 65;
 
       // Ca 1: Dưới biên - Negative
+      const id1 = `TC_CORE_BVA_${String(idx).padStart(3, "0")}`;
       cases.push({
         id: idx++,
-        test_case_id: `TC_CORE_BVA_${String(idx).padStart(3, "0")}`,
+        test_case_id: id1,
+        code: id1,
         technique: "BVA",
+        technique_source: "BVA",
         category: "Boundary",
         test_type: "Negative",
+        scenario: `[Biên Dưới - Negative] Kiểm tra hệ thống từ chối khi nhập ${p.name} = ${min - 1} (dưới ngưỡng tối thiểu quy định là ${min}).`,
         scenario_description: `[Biên Dưới - Negative] Kiểm tra hệ thống từ chối khi nhập ${p.name} = ${min - 1} (dưới ngưỡng tối thiểu quy định là ${min}).`,
         preconditions: "Hệ thống đang ở trạng thái hoạt động bình thường, tài khoản người dùng đã đăng nhập hợp lệ.",
         test_steps: `1. Điều hướng đến màn hình thao tác.\n2. Nhập trường ${p.name} với giá trị ${min - 1}.\n3. Nhấn nút Xác nhận.\n4. Quan sát phản hồi của hệ thống.`,
         input_data: { [p.name]: min - 1 },
         expected_result: "Mã phản hồi HTTP 422 Unprocessable Entity. Hiển thị thông báo lỗi yêu cầu giá trị phải từ ngưỡng tối thiểu trở lên.",
         postconditions: "Giao dịch bị từ chối, không ghi nhận bản ghi sai lệch vào cơ sở dữ liệu.",
+        priority: "High",
         status: "Fail",
       });
 
       // Ca 2: Ngay biên dưới - Positive
+      const id2 = `TC_CORE_BVA_${String(idx).padStart(3, "0")}`;
       cases.push({
         id: idx++,
-        test_case_id: `TC_CORE_BVA_${String(idx).padStart(3, "0")}`,
+        test_case_id: id2,
+        code: id2,
         technique: "BVA",
+        technique_source: "BVA",
         category: "Boundary",
         test_type: "Positive",
+        scenario: `[Biên Dưới - Positive] Kiểm tra hệ thống chấp nhận khi nhập ${p.name} = ${min} (vừa đúng ngưỡng tối thiểu).`,
         scenario_description: `[Biên Dưới - Positive] Kiểm tra hệ thống chấp nhận khi nhập ${p.name} = ${min} (vừa đúng ngưỡng tối thiểu).`,
         preconditions: "Tài khoản người dùng đã đăng nhập hợp lệ.",
         test_steps: `1. Điều hướng đến màn hình chức năng.\n2. Nhập trường ${p.name} = ${min}.\n3. Nhấn nút Xác nhận.\n4. Quan sát phản hồi của hệ thống.`,
         input_data: { [p.name]: min },
         expected_result: "Mã phản hồi HTTP 200 OK. Hệ thống xác nhận thành công và hiển thị thông báo hợp lệ.",
         postconditions: "Dữ liệu được ghi nhận chính xác vào cơ sở dữ liệu.",
+        priority: "Medium",
         status: "Pass",
       });
 
       // Ca 3: Ngay biên trên - Positive
+      const id3 = `TC_CORE_BVA_${String(idx).padStart(3, "0")}`;
       cases.push({
         id: idx++,
-        test_case_id: `TC_CORE_BVA_${String(idx).padStart(3, "0")}`,
+        test_case_id: id3,
+        code: id3,
         technique: "BVA",
+        technique_source: "BVA",
         category: "Boundary",
         test_type: "Positive",
+        scenario: `[Biên Trên - Positive] Kiểm tra hệ thống chấp nhận khi nhập ${p.name} = ${max} (vừa đúng ngưỡng tối đa).`,
         scenario_description: `[Biên Trên - Positive] Kiểm tra hệ thống chấp nhận khi nhập ${p.name} = ${max} (vừa đúng ngưỡng tối đa).`,
         preconditions: "Tài khoản người dùng đã đăng nhập hợp lệ.",
         test_steps: `1. Điều hướng đến màn hình chức năng.\n2. Nhập trường ${p.name} = ${max}.\n3. Nhấn nút Xác nhận.`,
         input_data: { [p.name]: max },
         expected_result: "Mã phản hồi HTTP 200 OK. Hệ thống xử lý thành công.",
         postconditions: "Dữ liệu được lưu trữ chuẩn xác.",
+        priority: "Medium",
         status: "Pass",
       });
 
       // Ca 4: Vượt biên trên - Negative
+      const id4 = `TC_CORE_BVA_${String(idx).padStart(3, "0")}`;
       cases.push({
         id: idx++,
-        test_case_id: `TC_CORE_BVA_${String(idx).padStart(3, "0")}`,
+        test_case_id: id4,
+        code: id4,
         technique: "BVA",
+        technique_source: "BVA",
         category: "Boundary",
         test_type: "Negative",
+        scenario: `[Biên Trên - Negative] Kiểm tra hệ thống báo lỗi khi nhập ${p.name} = ${max + 1} (vượt quá ngưỡng tối đa cho phép là ${max}).`,
         scenario_description: `[Biên Trên - Negative] Kiểm tra hệ thống báo lỗi khi nhập ${p.name} = ${max + 1} (vượt quá ngưỡng tối đa cho phép là ${max}).`,
         preconditions: "Tài khoản người dùng đã đăng nhập hợp lệ.",
         test_steps: `1. Điều hướng đến màn hình chức năng.\n2. Nhập trường ${p.name} = ${max + 1}.\n3. Nhấn nút Xác nhận.`,
         input_data: { [p.name]: max + 1 },
         expected_result: "Mã phản hồi HTTP 422 Unprocessable Entity. Báo lỗi vượt quá giá trị cho phép.",
         postconditions: "Hệ thống từ chối lưu dữ liệu sai.",
+        priority: "High",
         status: "Pass",
       });
     });

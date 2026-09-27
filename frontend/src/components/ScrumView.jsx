@@ -224,7 +224,9 @@ export default function ScrumView({ activeProject, onSelectFeatureForTesting }) 
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
                 <h3 style={{ margin: 0, fontSize: "var(--font-size-md)", fontWeight: 700 }}>{activeSprint.name}</h3>
-                <span className="badge badge--primary" style={{ fontSize: "11px" }}>{activeSprint.status.toUpperCase()}</span>
+                <span className="badge badge--primary" style={{ fontSize: "11px" }}>
+                  {String(activeSprint.status || "ACTIVE").toUpperCase()}
+                </span>
                 {/* Definition of Done (DoD) Badge */}
                 {activeSprint.dod_met ? (
                   <span className="badge badge--pass" style={{ fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "3px" }}>

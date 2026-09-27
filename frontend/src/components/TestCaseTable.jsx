@@ -4,17 +4,19 @@ import { exportTestSuite, updateTestCase } from "../api";
 import ProjectTestReport from "./ProjectTestReport";
 
 function TypeBadge({ type }) {
-  const cls = `badge badge--${type}`;
+  const safeType = String(type || "positive").toLowerCase();
+  const cls = `badge badge--${safeType}`;
   const labels = {
     positive: "POSITIVE",
     negative: "NEGATIVE",
     boundary: "BOUNDARY",
   };
-  return <span className={cls}>{labels[type] || type.toUpperCase()}</span>;
+  return <span className={cls}>{labels[safeType] || safeType.toUpperCase()}</span>;
 }
 
 function TechniqueBadge({ source }) {
-  return <span className={`badge badge--${source}`}>{source.toUpperCase()}</span>;
+  const safeSource = String(source || "BVA").toLowerCase();
+  return <span className={`badge badge--${safeSource}`}>{safeSource.toUpperCase()}</span>;
 }
 
 export default function TestCaseTable({ result, projectName }) {

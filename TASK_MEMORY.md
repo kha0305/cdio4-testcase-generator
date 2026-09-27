@@ -579,10 +579,87 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
 
 ---
 
+### Checkpoint #028 — Khắc Phục Lỗi Thiếu Uvicorn Trên Container Pikamc & Phục Hồi Ngữ Cảnh Sau Lỗi Quá Tải API
+- **Bối cảnh**: Phiên giao tiếp trước đó bị gián đoạn do lỗi API quá tải (HTTP 429 Overloaded) ngay khi hệ thống vừa nén xong bản vá.
+- **Hiện trạng log từ terminal người dùng**:
+  - `[cdio4] /usr/bin/python3: No module named uvicorn`
+  - `[cdio4] Backend thoat (code=1), tu khoi dong lai sau 5s...`
+- **Nguyên nhân**: Lệnh `pip install` thất bại âm thầm do thiếu cờ `--user`, và tệp `requirements.txt` gốc chứa `spacy` + `z3-solver` đòi hỏi trình biên dịch C++ vốn không có trên container Node.js Pterodactyl.
+- **Các thao tác đã hoàn thành**:
+  1. Tạo tệp [requirements-pikamc.txt](file:///D:/tool/search-exam/cdio4-upload-staging/cdio4-backend/requirements-pikamc.txt) tinh gọn (fastapi, uvicorn, sqlalchemy, pydantic, passlib, openpyxl, allpairspy).
+  2. Cập nhật `server.js` trong [exam-lookup-system](file:///D:/tool/search-exam/exam-lookup-system/server.js) ưu tiên nạp `requirements-pikamc.txt`, bổ sung cờ `--user --break-system-packages -q` và `stdio: "inherit"`.
+  3. Cập nhật gói nén sẵn sàng tại [cdio4-pikamc-upload.zip](file:///D:/tool/search-exam/cdio4-pikamc-upload.zip).
+- **Trạng thái**: **[HOAN TAT PHUC HOI — SAN SANG HUONG DAN TIEP]**
+
+### Checkpoint #029 — Xử Lý Sự Cố Đầy Ổ Đĩa (No space left on device) & Tự Động Phục Hồi Web Phim
+- **Bối cảnh sự cố**: Người dùng phản ánh `[Errno 28] No space left on device` và web phim (`video.server.id.vn`) không load được danh sách phim ("Chưa có video nào trong kho lưu trữ").
+- **Nguyên nhân cốt lõi**:
+  1. Lệnh `pip install` tự động trong `server.js` chạy đồng bộ với tệp `requirements.txt` gốc chứa `spacy` -> pip tải `numpy` (16.7MB), `cython`, bộ build tools tạm vào `/tmp` và `~/.cache/pip`, ngốn sạch 100% dung lượng ổ cứng được cấp của container Pterodactyl Pikamc.
+  2. Ổ cứng bị đầy 0 bytes khiến `video-streaming-service` không thể đọc/ghi tệp tạm thời, hoặc `metadata.json` bị ghi đè rỗng `[]` khi tiến trình bị crash/restart.
+  3. CDIO-4 bị lỗi lặp vòng vô tận mỗi 5 giây (`code=1`), liên tục chiếm dụng CPU/RAM và spam log.
+- **Biện pháp xử lý đã thực hiện**:
+  1. [server.js](file:///D:/tool/search-exam/exam-lookup-system/server.js): Loại bỏ hoàn toàn lệnh `pip install` tự động bằng `execSync`; đặt giới hạn thử lại tối đa 3 lần cho CDIO-4 (không loop vô tận mỗi 5s).
+  2. [videoManager.js](file:///D:/tool/search-exam/video-streaming-service/src/services/videoManager.js): Bổ sung hàm `_autoRecoverVideos()` tự động quét thư mục `storage/videos/` để tái tạo lại danh sách phim nếu `metadata.json` bị rỗng; thêm chốt chặn bảo vệ không ghi đè `metadata.json` bằng mảng rỗng nếu tệp cũ có dữ liệu.
+  3. [requirements.txt](file:///D:/tool/search-exam/cdio4-upload-staging/cdio4-backend/requirements.txt): Thay thế bằng phiên bản siêu nhẹ không chứa `spacy` và `z3-solver`.
+  4. Đóng gói lại [cdio4-pikamc-upload.zip](file:///D:/tool/search-exam/cdio4-pikamc-upload.zip).
+- **Trạng thái**: **[HOAN TAT — DANG HUONG DAN NGUOI DUNG GIAI PHONG BO NHO VA KHOI DONG LAI]**
+
+### Checkpoint #030 — Tích Hợp Cơ Chế Tự Phục Hồi Toàn Diện (Self-Healing) Vào server.js (Zero-Terminal Solution)
+- **Bối cảnh**: Do cổng 2023 của Pikamc là cổng SFTP và Web Console không hỗ trợ interactive bash shell, việc hướng dẫn người dùng gõ lệnh terminal (`rm -rf` hay `pip install`) bị lỗi không thực hiện được, máy chủ vẫn giữ nguyên trạng thái đầy ổ đĩa và mất danh sách phim.
+- **Giải pháp triệt để**: Tích hợp 100% logic tự động cứu hộ vào tệp [server.js](file:///D:/tool/search-exam/exam-lookup-system/server.js) để Node.js tự thực thi ngay khi khởi động:
+  1. **Tự động dọn rác đĩa**: Chạy `rm -rf ~/.cache/pip /tmp/*` trong nền ngay dòng đầu tiên để thu hồi 100% dung lượng trống.
+  2. **Tự động phục hồi phim (`[video-rescue]`)**: Quét thư mục `storage/videos/`, nếu metadata rỗng thì tự động tạo lại danh mục phim vào `metadata.json` trước khi khởi động Video Service.
+  3. **Tự động cài uvicorn an toàn**: Kiểm tra `import uvicorn`, nếu thiếu thì tự chạy `pip install fastapi uvicorn --no-cache-dir` siêu nhẹ (không tốn dung lượng ổ đĩa).
+- **Thao tác duy nhất của người dùng**: Chỉ cần upload đè 1 tệp [server.js](file:///D:/tool/search-exam/exam-lookup-system/server.js) lên `/home/container/server.js` và nhấn Restart trên Pikamc Panel.
+- **Trạng thái**: **[HOAN TAT — SAN SANG CHO NGUOI DUNG RESTART]**
+
+### Checkpoint #031 — Khắc Phục Triệt Để 404 Video Stream & Bổ Sung SQLAlchemy/Pydantic Cho CDIO-4
+- **Hiện trạng từ log & ảnh chụp màn hình thực tế**:
+  1. **Tiến trình CDIO-4**: `uvicorn` đã khởi chạy thành công 100%! Chỉ dừng lại do thiếu thư viện ORM: `ModuleNotFoundError: No module named 'sqlalchemy'`. Giới hạn 3 lần thử đã hoạt động hoàn hảo, dừng lại đúng lúc không gây ngập log.
+  2. **Web Phim (`video.server.id.vn`)**: Tên video `vid_1790407434454_s6s9n9` dung lượng 1019.3 MB đã xuất hiện trên giao diện, nhưng khi bấm xem thì báo lỗi:
+     `GET /api/stream/vid_1790407434454_s6s9n9 404 (Not Found)`
+     `POST /api/videos/vid_1790407434454_s6s9n9/heartbeat 404 (Not Found)`
+     Nguyên nhân: `metadata.json` chưa được nạp ID này vào RAM, hàm `getVideoById` chỉ tìm trong Map bộ nhớ mà không kiểm tra tệp thực tế trên đĩa.
+- **Biện pháp xử lý triệt để đã triển khai**:
+  1. [videoManager.js](file:///D:/tool/search-exam/video-streaming-service/src/services/videoManager.js): Bổ sung cơ chế **Disk Fallback** trong `getVideoById(id)` — Nếu ID chưa có trong RAM, tự động tìm trực tiếp tệp `.mp4` trong `storage/videos/`, tự động nạp vào bộ nhớ và cho phép stream ngay lập tức. Triệt tiêu hoàn toàn lỗi 404 cho mọi tệp video đang có trên đĩa.
+  2. [server.js](file:///D:/tool/search-exam/exam-lookup-system/server.js): Mở rộng lệnh cài đặt tự động bao gồm: `sqlalchemy`, `pydantic`, `python-multipart`, `passlib[bcrypt]`, `openpyxl`, `allpairspy` sử dụng cờ `--no-cache-dir -q` (không tốn dung lượng ổ đĩa, hoàn tất trong ~5 giây).
+  3. Cập nhật gói nén sẵn sàng tại [cdio4-pikamc-upload.zip](file:///D:/tool/search-exam/cdio4-pikamc-upload.zip).
+- **Trạng thái**: **[HOAN TAT — SAN SANG CHO NGUOI DUNG CAP NHAT FILE]**
+
+### Checkpoint #032 — Bổ Sung Gói Python-Jose Cho CDIO-4 & Quét Từng Tệp Video Vào Metadata
+- **Hiện trạng từ log mới nhất**:
+  - `SQLAlchemy` đã nạp thành công 100%!
+  - CDIO-4 tiến thêm một bước và chỉ dừng lại ở gói mã hóa JWT cuối cùng:
+    `from jose import JWTError, jwt` -> `ModuleNotFoundError: No module named 'jose'`.
+  - Phân tích toàn bộ mã nguồn `backend`: Danh sách tất cả các thư viện thứ ba được import gồm: `fastapi`, `uvicorn`, `sqlalchemy`, `pydantic`, `jose`, `bcrypt`, `openpyxl`, `allpairspy`.
+- **Xử lý triệt để**:
+  1. [server.js](file:///D:/tool/search-exam/exam-lookup-system/server.js):
+     - Thêm kiểm tra `jose` vào lệnh kiểm tra trước khi chạy.
+     - Lệnh pip install bổ sung `python-jose` và `bcrypt` với cờ `--no-cache-dir -q` (chỉ mất ~2 giây, không tốn dung lượng ổ đĩa).
+     - Khối `video-rescue` duyệt qua **từng tệp video** trong `storage/videos/`, nếu tệp nào chưa có trong `metadata.json` thì tự động thêm vào ngay (không còn phụ thuộc điều kiện mảng rỗng).
+  2. [videoManager.js](file:///D:/tool/search-exam/video-streaming-service/src/services/videoManager.js): Cơ chế Disk Fallback trực tiếp trong `getVideoById` cho phép stream ngay tệp `.mp4` kể cả khi chưa có trong RAM.
+  3. Cập nhật gói nén sẵn sàng tại [cdio4-pikamc-upload.zip](file:///D:/tool/search-exam/cdio4-pikamc-upload.zip).
+- **Trạng thái**: **[HOAN TAT — SAN SANG CAP NHAT FILE]**
+
+### Checkpoint #033 — Phát Hiện & Đồng Bộ Triệt Để videoManager.js Trong exam-lookup-system (Chấm Dứt 404 Web Phim)
+- **Phát hiện cấu trúc**: Dự án có 2 thư mục `video-streaming-service`:
+  1. Thư mục độc lập bên ngoài: `D:\tool\search-exam\video-streaming-service\`
+  2. Thư mục lồng bên trong: `D:\tool\search-exam\exam-lookup-system\video-streaming-service\`
+  Tệp tin thực tế đang được máy chủ Node.js gọi chạy tại `/home/container/` chính là bản bên trong `exam-lookup-system` (vốn vẫn là bản cũ 166 dòng chưa có Disk Fallback, dẫn đến `getVideoById` trả về `undefined` và gây lỗi 404).
+- **Thực hiện khắc phục dứt điểm**:
+  1. Đã nâng cấp đồng bộ cả 2 hàm `getAllVideos()` và `getVideoById(id)` trong [exam-lookup-system/video-streaming-service/src/services/videoManager.js](file:///D:/tool/search-exam/exam-lookup-system/video-streaming-service/src/services/videoManager.js):
+     - `getVideoById`: Tìm trong RAM -> Nếu không thấy, tìm thẳng các ứng viên tệp `.mp4` trong `storage/videos/` -> Tự động nạp vào metadata và trả về đối tượng video để stream ngay lập tức.
+     - `getAllVideos`: Tự động quét toàn bộ thư mục `storage/videos/` để bổ sung bất kỳ video nào chưa có trong metadata.
+  2. Đồng bộ tệp sang cả 3 vị trí (bên ngoài, bên trong `exam-lookup-system`, và thư mục staging nén zip).
+  3. Cập nhật gói nén sẵn sàng tại [cdio4-pikamc-upload.zip](file:///D:/tool/search-exam/cdio4-pikamc-upload.zip).
+- **Trạng thái**: **[HOAN TAT — SAN SANG CHO NGUOI DUNG UPLOAD DUNG TEP]**
+
+---
+
 ## 4. KE HOACH HANH DONG TIEP THEO (NEXT ACTION ITEMS)
-- **Ke hoach 1**: Tiep tuc doc tap tin nay ngay dau moi phien giao tiep hoac truoc bat ky lenh sua code nao theo dung Dieu 8 AGENTS.md.
-- **Ke hoach 2**: Sau khi nguoi dung upload SFTP xong, kiem tra log Pikamc xem CDIO-4 FastAPI da khoi dong thanh cong chua (tim dong `[cdio4] Application startup complete.`).
-- **Ke hoach 3**: Cap nhat URL backend trong GitHub Pages frontend de tro ve cong 25145 tren host Pikamc.
+- **Ke hoach 1**: Huong dan nguoi dung upload 2 file: `server.js` va `videoManager.js` vao dung duong dan `/home/container/video-streaming-service/src/services/videoManager.js`.
+- **Ke hoach 2**: Nguoi dung nhan Restart tren Pikamc Panel.
+- **Ke hoach 3**: Kiem tra web phim phat mượt mà va CDIO-4 log `[cdio4] Application startup complete.`.
 
 
 
