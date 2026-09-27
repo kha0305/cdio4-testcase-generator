@@ -546,13 +546,31 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
     - Tự động nạp sẵn dữ liệu dự án mẫu E-Commerce (3 User Story, 2 Sprint) để trải nghiệm trọn vẹn mọi phân hệ Studio, Scrum, Lịch phân công và Báo cáo.
   - Đã bổ sung tính năng cấu hình URL Máy Chủ Backend tùy chọn trong [frontend/src/components/AuthModal.jsx](file:///d:/Do-an/CDIO-4/code/frontend/src/components/AuthModal.jsx).
   - Bản build production `npm run build` hoàn thành trong 281ms không có cảnh báo/lỗi nào.
-- **Trạng thái**: **[HOAN TAT]**
+### Checkpoint #026 — Tao Nhanh Trien Khai Backend Tren May Chu Pikamc (deploy/pikamc-backend)
+- **Muc tieu**:
+  1. Tao nhanh `deploy/pikamc-backend` tu nhanh `main` trong kho CDIO-4 de trien khai chi rieng Backend FastAPI len may chu Pikamc (Node.js 22 Docker container).
+  2. Them `server.js` bootstrap tu dong cai dat thu vien Python va khoi chay uvicorn FastAPI.
+  3. Them `ecosystem.config.cjs` cho PM2 de quan ly tien trinh chay nen.
+  4. Mo rong CORS origins trong `backend/main.py` de chap nhan ket noi tu GitHub Pages va domain Pikamc.
+  5. Huong dan nguoi dung dien form Khoi Dong tren Pikamc Control Panel.
+- **Tap tin can thiep**:
+  - `server.js` (Tao moi — bootstrap khoi chay Python/uvicorn)
+  - `ecosystem.config.cjs` (Tao moi — PM2 config)
+  - `backend/main.py` (Cap nhat CORS origins)
+  - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
+- **Ket qua thuc hien**:
+  - Da tao nhanh `deploy/pikamc-backend` va day len GitHub thanh cong.
+  - `server.js` tu dong phat hien Python, cai goi pip, khoi chay uvicorn cong 25148.
+  - `ecosystem.config.cjs` cau hinh PM2 voi ten `cdio4-autotest-backend`, tu khoi dong lai khi gap loi.
+  - CORS mo rong them: `https://kha0305.github.io`, `https://dtu-portal.server.id.vn`.
+  - Dang thuc hien tiep: Cap nhat `server.js` de xu ly may chu Node.js 22 khong co Python san co (tu dong cai `python3` qua `apt-get`).
+- **Trang thai**: **[DANG THUC HIEN]**
 
 ---
 
-## 4. KẾ HOẠCH HÀNH ĐỘNG TIẾP THEO (NEXT ACTION ITEMS)
-- **Kế hoạch 1**: Tiếp tục đọc tập tin này ngay đầu mỗi phiên giao tiếp hoặc trước bất kỳ lệnh sửa code nào theo đúng Điều 8 AGENTS.md.
-- **Kế hoạch 2**: Sẵn sàng phục vụ yêu cầu kiểm thử, bổ sung tính năng hoặc điều chỉnh giao diện tiếp theo của người dùng.
+## 4. KE HOACH HANH DONG TIEP THEO (NEXT ACTION ITEMS)
+- **Ke hoach 1**: Tiep tuc doc tap tin nay ngay dau moi phien giao tiep hoac truoc bat ky lenh sua code nao theo dung Dieu 8 AGENTS.md.
+- **Ke hoach 2**: San sang phuc vu yeu cau kiem thu, bo sung tinh nang hoac dieu chinh giao dien tiep theo cua nguoi dung.
 
 
 
