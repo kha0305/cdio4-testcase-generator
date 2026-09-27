@@ -25,7 +25,8 @@ from routers import parse, generate, export, projects, auth, sprints, requiremen
 # ---------------------------------------------------------------------------
 _cors_origins_raw = os.getenv(
     "CORS_ORIGINS",
-    "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173",
+    "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,"
+    "https://kha0305.github.io,https://dtu-portal.server.id.vn",
 )
 _cors_origins = [origin.strip() for origin in _cors_origins_raw.split(",") if origin.strip()]
 
