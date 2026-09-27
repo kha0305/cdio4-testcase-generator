@@ -507,6 +507,20 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
     - URL tiến trình: [https://github.com/kha0305/cdio4-testcase-generator/actions/runs/36321684332](https://github.com/kha0305/cdio4-testcase-generator/actions/runs/36321684332)
     - Trạng thái: `completed - success`
     - Toàn bộ 18/18 bước kiểm thử tích hợp hệ thống (System Test) và build production frontend (Vite Build) đều đạt tích xanh tuyệt đối trên máy chủ đám mây của GitHub.
+### Checkpoint #024 — Cấu Hình Tự Động Xuất Bản Giao Diện Lên GitHub Pages (.github.io)
+- **Mục tiêu**:
+  1. Cấu hình `frontend/vite.config.js` với `base: './'` để hỗ trợ nạp tài nguyên tĩnh (assets) chính xác trên GitHub Pages mà không làm ảnh hưởng môi trường local dev.
+  2. Tạo workflow GitHub Actions `.github/workflows/deploy-pages.yml` để tự động build và xuất bản giao diện web lên `https://kha0305.github.io/cdio4-testcase-generator/`.
+  3. Hợp nhất (merge) các tính năng từ `feature/test-git-runner` và workflow Pages vào nhánh `main`, đẩy lên GitHub.
+  4. Hướng dẫn người dùng kích hoạt nguồn GitHub Actions trong mục Settings -> Pages.
+- **Tập tin can thiệp**:
+  - `frontend/vite.config.js`
+  - `.github/workflows/deploy-pages.yml` (Tạo mới)
+  - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
+- **Kết quả thực hiện**:
+  - Đã cấu hình `base: './'` trong `vite.config.js`, biên dịch thử nghiệm thành công với đường dẫn relative sạch cho toàn bộ file css/js.
+  - Đã khởi tạo workflow `.github/workflows/deploy-pages.yml` với quyền `pages: write` và `id-token: write` theo chuẩn chính thức của GitHub.
+  - Sẵn sàng đẩy lên nhánh `main` để kích hoạt triển khai GitHub Pages.
 - **Trạng thái**: **[HOAN TAT]**
 
 ---
