@@ -520,7 +520,8 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
 - **Kết quả thực hiện**:
   - Đã cấu hình `base: './'` trong `vite.config.js`, biên dịch thử nghiệm thành công với đường dẫn relative sạch cho toàn bộ file css/js.
   - Đã khởi tạo workflow `.github/workflows/deploy-pages.yml` với quyền `pages: write` và `id-token: write` theo chuẩn chính thức của GitHub.
-  - Sẵn sàng đẩy lên nhánh `main` để kích hoạt triển khai GitHub Pages.
+  - Đã hợp nhất (merge) toàn bộ mã nguồn vào nhánh `main` và đẩy lên GitHub `origin main`.
+  - Bộ kiểm thử tự động CI Pipeline trên nhánh `main` đã chạy thành công 100% (18/18 bước kiểm thử tích hợp đạt tích xanh).
 - **Trạng thái**: **[HOAN TAT]**
 
 ---
