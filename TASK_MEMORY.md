@@ -654,12 +654,24 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
   3. Cập nhật gói nén sẵn sàng tại [cdio4-pikamc-upload.zip](file:///D:/tool/search-exam/cdio4-pikamc-upload.zip).
 - **Trạng thái**: **[HOAN TAT — SAN SANG CHO NGUOI DUNG UPLOAD DUNG TEP]**
 
+### Checkpoint #034 — Khắc Phục Triệt Để Màn Hình Trắng Trên GitHub Pages & Bổ Sung ErrorBoundary
+- **Hiện trạng từ DevTools trong ảnh chụp của người dùng**:
+  - `Uncaught TypeError: Cannot read properties of undefined (reading 'toUpperCase') at index-DBkJbkFD.js:174:854`
+  - Lỗi xảy ra tại `TestCaseTable.jsx` do component `TechniqueBadge` và `TypeBadge` gọi `source.toUpperCase()` / `type.toUpperCase()` khi dữ liệu ca kiểm thử từ chế độ Offline / Demo trả về chưa có các trường này.
+  - Lỗi render chưa được bắt (unhandled render error) làm toàn bộ cây DOM React bị sụp đổ thành màn hình trắng (Blank White Screen).
+- **Thực hiện khắc phục dứt điểm**:
+  1. [TestCaseTable.jsx](file:///d:/Do-an/CDIO-4/code/frontend/src/components/TestCaseTable.jsx): Thêm bảo vệ an toàn `String(type || "positive").toLowerCase()` và `String(source || "BVA").toLowerCase()` trước khi gọi `toUpperCase()`.
+  2. [ScrumView.jsx](file:///d:/Do-an/CDIO-4/code/frontend/src/components/ScrumView.jsx): Thêm `String(activeSprint.status || "ACTIVE").toUpperCase()`.
+  3. [api.js](file:///d:/Do-an/CDIO-4/code/frontend/src/api.js): Đồng bộ đầy đủ các trường dữ liệu `code`, `scenario`, `technique_source`, `priority` cho toàn bộ các ca kiểm thử dự phòng.
+  4. [main.jsx](file:///d:/Do-an/CDIO-4/code/frontend/src/main.jsx): Bọc toàn bộ ứng dụng bằng một `ErrorBoundary` chuyên dụng — nếu có bất kỳ lỗi hiển thị nào xảy ra trong tương lai, giao diện sẽ hiển thị nút "Xóa dữ liệu đệm & Tải lại ứng dụng" thay vì sụp đổ thành màn hình trắng.
+  5. Đã biên dịch `npm run build` thành công trong 682ms (0 lỗi, 0 cảnh báo), commit và thực hiện `git push origin main`. GitHub Actions đang tự động xuất bản bản vá mới lên GitHub Pages.
+- **Trạng thái**: **[HOAN TAT — DANG XUAT BAN GITHUB PAGES]**
+
 ---
 
 ## 4. KE HOACH HANH DONG TIEP THEO (NEXT ACTION ITEMS)
-- **Ke hoach 1**: Huong dan nguoi dung upload 2 file: `server.js` va `videoManager.js` vao dung duong dan `/home/container/video-streaming-service/src/services/videoManager.js`.
-- **Ke hoach 2**: Nguoi dung nhan Restart tren Pikamc Panel.
-- **Ke hoach 3**: Kiem tra web phim phat mượt mà va CDIO-4 log `[cdio4] Application startup complete.`.
+- **Ke hoach 1**: Khi GitHub Pages build xong (~1 phút), nguoi dung refresh lai trang `https://kha0305.github.io/cdio4-testcase-generator/` de xem giao dien hoat dong mượt mà.
+- **Ke hoach 2**: Tiep tuc upload `server.js` va `videoManager.js` len host Pikamc de phat phim tren `video.server.id.vn`.
 
 
 
