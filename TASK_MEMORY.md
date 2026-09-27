@@ -477,6 +477,19 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
   - Đã commit và thực hiện `git push origin main` thành công lên GitHub.
 - **Trạng thái**: **[HOAN TAT]**
 
+### Checkpoint #022 — Chuẩn Hóa Header README.md Sang Dạng Chữ & Menu Chuyển Tiếp Chuẩn Mực
+- **Mục tiêu**: Loại bỏ hoàn toàn banner ảnh thẻ `<img>`, áp dụng cấu trúc Header chữ căn giữa, đoạn mô tả súc tích, dải badges phẳng (flat-square) và thanh menu chuyển tiếp nhanh (bullet navigation) chuẩn xác theo phong cách repository mẫu của người dùng (`kha0305/visual-paradigm-watermark-remover`).
+- **Tập tin can thiệp**:
+  - `d:/Do-an/CDIO-4/code/README.md`
+  - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
+- **Kết quả thực hiện**:
+  - Đã loại bỏ thẻ `<img src="docs/assets/banner.svg" />`.
+  - Thay bằng khối Header chữ H1 căn giữa chuẩn Markdown GitHub: `# Hệ Thống Tự Động Sinh Test Case (AutoTest Platform)`.
+  - Đoạn giới thiệu súc tích nêu rõ giá trị cốt lõi và các chuẩn quốc tế (ISTQB CTFL v4.0, ISO/IEC/IEEE 29119-3, Z3 SMT Solver).
+  - Dải badges phẳng đầy đủ (Platform, Python, FastAPI, React, Vite, Z3 Solver, Tests 18/18 Pass 100%, License MIT).
+  - Menu chuyển tiếp nhanh phân cách bằng dấu chấm tròn `•` (`&bull;`) mỏ neo trực tiếp tới 8 mục chính trong tài liệu.
+- **Trạng thái**: **[HOAN TAT]**
+
 ---
 
 ## 4. KẾ HOẠCH HÀNH ĐỘNG TIẾP THEO (NEXT ACTION ITEMS)

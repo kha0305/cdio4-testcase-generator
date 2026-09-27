@@ -1,33 +1,33 @@
 <div align="center">
-  <img src="docs/assets/banner.svg" alt="CDIO-4 AutoTest Studio Banner" width="100%" />
-  <br /><br />
 
-  <p align="center">
-    <strong>Nền tảng Tự Động Bóc Tách Đặc Tả &amp; Sinh Ca Kiểm Thử Phần Mềm Chuẩn Quốc Tế</strong><br />
-    Tuân thủ quy chuẩn <strong>ISTQB CTFL v4.0</strong> &bull; Mô hình phân cấp mã <strong>ISO/IEC/IEEE 29119-3</strong> &bull; Động cơ <strong>Microsoft Z3 SMT Solver</strong>
-  </p>
+# Hệ Thống Tự Động Sinh Test Case (AutoTest Platform)
 
-  <p align="center">
-    <a href="#1-tổng-quan-đề-tài--vấn-đề-giải-quyết"><strong>Tổng Quan</strong></a> &bull;
-    <a href="#2-các-tính-năng-kỹ-thuật-nổi-bật"><strong>Tính Năng</strong></a> &bull;
-    <a href="#3-công-nghệ-sử-dụng-tech-stack"><strong>Kiến Trúc</strong></a> &bull;
-    <a href="#4-sơ-đồ-cấu-trúc-thư-mục-monorepo"><strong>Cấu Trúc Thư Mục</strong></a> &bull;
-    <a href="#5-hướng-dẫn-cài-đặt--khởi-chạy-nhanh-quick-start"><strong>Khởi Chạy Nhanh</strong></a> &bull;
-    <a href="#6-tài-khoản-mẫu--dữ-liệu-đồ-án-trải-nghiệm"><strong>Tài Khoản Mẫu</strong></a> &bull;
-    <a href="#7-kiểm-thử-tích-hợp-tự-động-1818-bước-pass-100"><strong>Kiểm Thử (18/18 Pass)</strong></a> &bull;
-    <a href="#8-quy-chuẩn-phát-triển--chống-sự-cố-agentsmd--task_memorymd"><strong>Quy Chuẩn AGENTS.md</strong></a>
-  </p>
+Nền tảng tự động bóc tách ngữ nghĩa từ tài liệu đặc tả yêu cầu phần mềm và sinh bộ ca kiểm thử chất lượng cao đạt chuẩn quốc tế **ISTQB CTFL v4.0** và **ISO/IEC/IEEE 29119-3**, tích hợp động cơ toán học Microsoft Z3 SMT Solver, BVA, Equivalence Partitioning và Pairwise Testing.
 
-  <p align="center">
-    <a href="https://github.com/kha0305/cdio4-testcase-generator"><img src="https://img.shields.io/badge/Monorepo-Fullstack-0F172A?style=flat-square&logo=github" alt="Monorepo" /></a>
-    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+" /></a>
-    <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.110%2B-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
-    <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18" /></a>
-    <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-5.x-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 5" /></a>
-    <a href="https://github.com/Z3Prover/z3"><img src="https://img.shields.io/badge/Solver-Microsoft_Z3-7C3AED?style=flat-square" alt="Microsoft Z3" /></a>
-    <a href="#"><img src="https://img.shields.io/badge/Kiểm_Thử-18%2F18_Pass_(100%25)-16A34A?style=flat-square" alt="Tests 18/18 Pass" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/Giấy_Phép-MIT-2563EB?style=flat-square" alt="MIT License" /></a>
-  </p>
+<br />
+
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-0F172A?style=flat-square)](https://github.com/kha0305/cdio4-testcase-generator)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Z3 Solver](https://img.shields.io/badge/Solver-Microsoft%20Z3-7C3AED?style=flat-square)](https://github.com/Z3Prover/z3)
+[![Tests](https://img.shields.io/badge/Kiểm%20Thử-18%2F18%20Pass%20(100%25)-16A34A?style=flat-square)](#7-kiểm-thử-tích-hợp-tự-động-1818-bước-pass-100)
+[![License](https://img.shields.io/badge/Giấy%20Phép-MIT-2563EB?style=flat-square)](LICENSE)
+
+<br />
+
+<p align="center">
+  <a href="#2-các-tính-năng-kỹ-thuật-nổi-bật"><strong>Tính Năng Nổi Bật</strong></a> &bull;
+  <a href="#1-tổng-quan-đề-tài--vấn-đề-giải-quyết"><strong>Nguyên Lý Hoạt Động</strong></a> &bull;
+  <a href="#3-công-nghệ-sử-dụng-tech-stack"><strong>Công Nghệ Sử Dụng</strong></a> &bull;
+  <a href="#5-hướng-dẫn-cài-đặt--khởi-chạy-nhanh-quick-start"><strong>Khởi Chạy Nhanh</strong></a> &bull;
+  <a href="#6-tài-khoản-mẫu--dữ-liệu-đồ-án-trải-nghiệm"><strong>Tài Khoản Mẫu</strong></a> &bull;
+  <a href="#7-kiểm-thử-tích-hợp-tự-động-1818-bước-pass-100"><strong>Kiểm Thử (18/18 Pass)</strong></a> &bull;
+  <a href="#4-sơ-đồ-cấu-trúc-thư-mục-monorepo"><strong>Cấu Trúc Thư Mục</strong></a> &bull;
+  <a href="#9-giấy-phép--tác-giả"><strong>Tác Giả</strong></a>
+</p>
+
 </div>
 
 ---
