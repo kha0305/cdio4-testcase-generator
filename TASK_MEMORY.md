@@ -733,9 +733,24 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
   4. Đã đồng bộ [videoManager.js](file:///d:/Do-an/CDIO-4/code/video-streaming-service/src/services/videoManager.js) và [server.js](file:///d:/Do-an/CDIO-4/code/server.js) trên toàn bộ các thư mục.
 - **Trạng thái**: **[HOAN TAT — DANG HO TRO DONG BO LEN MAY CHU]**
 
+### Checkpoint #039 — Tích Hợp Thư Viện SheetJS Cho Phép Xuất File Excel (.xlsx) Thật Sự Ở Chế Độ Offline
+- **Hiện trạng người dùng phản hồi**: "ý làm xuất excel mà nó xuất csv". Khi bấm nút "Xuất Excel (.xlsx)" trên GitHub Pages, tệp tải về lại là tệp `.csv` với nội dung rút gọn.
+- **Nguyên nhân kỹ thuật chính xác**:
+  - Trong [api.js](file:///d:/Do-an/CDIO-4/code/frontend/src/api.js): Hàm `exportTestSuite` và `exportProjectReport` ban đầu gửi yêu cầu đến backend FastAPI qua endpoint `/export/{suiteId}?format=xlsx`.
+  - Khi chạy trên GitHub Pages (chế độ demo/offline không có backend kết nối), yêu cầu mạng `fetch` thất bại và rơi vào khối `catch`.
+  - Trong khối `catch`, mã nguồn trước đây gán cứng xuất tệp CSV tạm thời (`a.download = test_suite_${suiteId}.csv`) bất kể người dùng chọn định dạng nào.
+- **Thực hiện khắc phục triệt để**:
+  1. Cài đặt thư viện xử lý bảng tính chuẩn mực `xlsx` (SheetJS) vào [frontend/package.json](file:///d:/Do-an/CDIO-4/code/frontend/package.json).
+  2. Nâng cấp [api.js](file:///d:/Do-an/CDIO-4/code/frontend/src/api.js) bổ sung hàm `exportTestSuiteOffline` và `exportProjectReportOffline`:
+     - Khi người dùng chọn **`Xuất Excel (.xlsx)`**: Tự động sinh tệp bảng tính Excel `.xlsx` đa tầng (Sheet 1: Danh sách Test Cases đầy đủ 10 cột chuẩn ISO 29119; Sheet 2: Báo cáo tổng hợp chất lượng, tỷ lệ Pass/Fail, tiêu chuẩn ISTQB) với định dạng MIME type `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
+     - Khi người dùng chọn **`Xuất CSV`**: Xuất tệp `.csv` kèm ký tự nhận diện UTF-8 BOM (`\uFEFF`) để mở trên Microsoft Excel không bao giờ bị lỗi dấu tiếng Việt.
+     - Khi người dùng chọn **`Xuất JSON`** / **`Xuất Markdown`**: Xuất đúng định dạng `.json` và `.md`.
+  3. Cập nhật [TestCaseTable.jsx](file:///d:/Do-an/CDIO-4/code/frontend/src/components/TestCaseTable.jsx) truyền danh sách ca kiểm thử thực tế vào hàm xuất file.
+  4. Đã build `npm run build` thành công trong 347ms (`index-BdqwPUjA.js`), commit và đẩy lên nhánh `main` (`commit 247935a`). GitHub Actions đang tự động triển khai bản cập nhật lên GitHub Pages.
+- **Trạng thái**: **[HOAN TAT — DANG TRIEN KHAI GITHUB PAGES]**
+
 ---
 
 ## 4. KE HOACH HANH DONG TIEP THEO (NEXT ACTION ITEMS)
-- **Kế hoạch 1**: Người dùng đẩy 2 tệp `server.js` (ở thư mục gốc) và `videoManager.js` (trong `video-streaming-service/src/services/`) lên máy chủ qua SFTP.
-- **Kế hoạch 2**: Khởi động lại container trên Pikamc Console.
-- **Kế hoạch 3**: Mở lại trang `https://video.server.id.vn/admin`: Toàn bộ thời lượng (ví dụ `24:15`) và độ phân giải (`1080p`) sẽ tự động được hiển thị chuẩn xác.
+- **Kế hoạch 1**: Đợi GitHub Actions triển khai hoàn tất (~1 phút), người dùng nhấn `Ctrl + F5` trên `https://kha0305.github.io/cdio4-testcase-generator/`.
+- **Kế hoạch 2**: Bấm nút **"Xuất Excel (.xlsx)"**: Kiểm tra tệp tải về máy tính có đuôi chuẩn `.xlsx`, mở bằng Excel gồm 2 Sheet chuyên nghiệp và đầy đủ dấu tiếng Việt.
