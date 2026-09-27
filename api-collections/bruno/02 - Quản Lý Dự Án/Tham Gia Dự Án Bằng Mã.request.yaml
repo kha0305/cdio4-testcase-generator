@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/api/projects/join"
+method: POST
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "join_code": "NHAP_MA_DU_AN_O_DAY"
+    }
+order: 6000

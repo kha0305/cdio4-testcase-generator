@@ -1,0 +1,32 @@
+$kind: http-request
+url: "{{base_url}}/api/generate"
+method: POST
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "requirement_id": {{requirement_id}},
+      "techniques": ["bva", "ep", "pairwise"],
+      "constraints": [],
+      "parameters": [
+        {
+          "name": "vai_tro",
+          "data_type": "enum",
+          "enum_values": ["VIP", "Regular", "Guest"],
+          "is_required": true,
+          "description": "Vai trò khách hàng"
+        },
+        {
+          "name": "so_luong",
+          "data_type": "integer",
+          "min_value": 1,
+          "max_value": 100,
+          "is_required": true,
+          "description": "Số lượng sản phẩm đặt mua"
+        }
+      ]
+    }
+order: 4000

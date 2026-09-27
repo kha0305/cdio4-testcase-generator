@@ -1,0 +1,32 @@
+$kind: http-request
+url: "{{base_url}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "qalead",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      var res = pm.response.json();
+      if (res.token) {
+          pm.collectionVariables.set('token', res.token);
+          pm.collectionVariables.set('user_id', res.user.id.toString());
+          console.log('[OK] JWT token da luu vao bien {{token}}');
+          console.log('User:', res.user.username, '| Role:', res.user.role);
+      }
+      pm.test('Dang nhap thanh cong (200)', () => pm.response.to.have.status(200));
+      pm.test('Token la JWT hop le', () => pm.expect(res.token).to.match(/^eyJ/));
+      pm.test('Co day du thong tin user', () => {
+          pm.expect(res.user).to.have.property('id');
+          pm.expect(res.user).to.have.property('username');
+          pm.expect(res.user).to.have.property('email');
+          pm.expect(res.user).to.have.property('role');
+      });
+    language: text/javascript
+order: 3000

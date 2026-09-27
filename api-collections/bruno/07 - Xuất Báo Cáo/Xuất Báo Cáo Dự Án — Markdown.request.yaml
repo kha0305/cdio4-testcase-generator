@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{base_url}}/api/projects/{{project_id}}/export?format=markdown"
+method: GET
+headers:
+  Authorization: Bearer {{token}}
+queryParams:
+  format: markdown
+order: 5000

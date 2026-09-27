@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{base_url}}/api/requirements/{{requirement_id}}"
+method: PUT
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "in_testing",
+      "assignee_name": "Trần Thị B",
+      "priority": "High"
+    }
+order: 3000

@@ -1,0 +1,19 @@
+# Cơ sở dữ liệu SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Cấu hình môi trường (chứa bí mật - KHÔNG được commit)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.venv/
+venv/
+env/
+
+# Logs
+*.log

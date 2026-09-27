@@ -1,0 +1,25 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+sqlalchemy==2.0.35
+pydantic==2.9.0
+python-multipart==0.0.9
+
+# Bảo mật - Xác thực & Mật khẩu
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.5.0
+
+# Cấu hình môi trường
+python-dotenv==1.2.3
+
+# NLP & Parsing
+spacy==3.7.6
+
+# Test Generation Engines
+z3-solver==4.13.0.0
+allpairspy==2.5.1
+
+# Export
+openpyxl==3.1.5
+
+# CORS
+starlette==0.38.6

@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "qalead",
+      "password": "sai_mat_khau"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Phai tra 401 Unauthorized', () => pm.response.to.have.status(401));
+      pm.test('Co thong bao loi', () => pm.expect(pm.response.json().detail).to.include('khong chinh xac'));
+    language: text/javascript
+order: 4000

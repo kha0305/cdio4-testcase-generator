@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{base_url}}/api/projects"
+method: POST
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Dự Án E-Commerce CDIO",
+      "code": "ECOM-01",
+      "description": "Hệ thống kiểm thử cho website thương mại điện tử",
+      "version": "1.0.0",
+      "lead": "Trưởng Nhóm QA",
+      "project_type": "team"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Tao thanh cong', () => pm.expect(pm.response.code).to.be.oneOf([200,201]));
+      var res = pm.response.json();
+      if (res.id) {
+          pm.collectionVariables.set('project_id', res.id.toString());
+          console.log('project_id moi:', res.id, '| Join code:', res.join_code);
+      }
+    language: text/javascript
+order: 2000

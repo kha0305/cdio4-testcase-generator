@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{base_url}}/api/parse"
+method: POST
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "raw_text": "Người dùng phải nhập tuổi từ 18 đến 65 tuổi. Mật khẩu phải từ 6 đến 20 ký tự và chứa ít nhất 1 chữ hoa.",
+      "format_type": "free_text",
+      "project_name": "Dự Án E-Commerce CDIO",
+      "project_id": {{project_id}}
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Boc tach thanh cong (200)', () => pm.response.to.have.status(200));
+      var res = pm.response.json();
+      pm.test('Co danh sach tham so', () => pm.expect(res.parameters).to.be.an('array'));
+      pm.test('Co requirement_id', () => pm.expect(res.requirement_id).to.be.a('number'));
+      if (res.requirement_id) {
+          pm.collectionVariables.set('requirement_id', res.requirement_id.toString());
+          console.log('requirement_id:', res.requirement_id, '| So tham so:', res.parameters.length);
+      }
+    language: text/javascript
+order: 1000

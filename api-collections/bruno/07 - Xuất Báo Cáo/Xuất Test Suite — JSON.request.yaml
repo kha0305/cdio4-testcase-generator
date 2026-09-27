@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{base_url}}/api/export/{{suite_id}}?format=json"
+method: GET
+headers:
+  Authorization: Bearer {{token}}
+queryParams:
+  format: json
+order: 3000

@@ -1,0 +1,3061 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hệ Thống Tự Động Sinh Test Case API (CDIO-4)",
+    "description": "Nền tảng tự động bóc tách đặc tả yêu cầu, giải ràng buộc và sinh bộ kiểm thử phần mềm đa phương pháp (BVA, Phân vùng tương đương, Pairwise, Z3 Solver). Quản lý chu kỳ Scrum, phân công nhiệm vụ thành viên và xuất báo cáo kiểm thử nghiệm thu chuyên nghiệp.",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Xác thực & Người dùng"
+        ],
+        "summary": "Đăng ký tài khoản mới",
+        "description": "Đăng ký tài khoản người dùng. Mật khẩu được hash bằng bcrypt. Token JWT được trả về ngay sau khi đăng ký thành công.",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegister"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Xác thực & Người dùng"
+        ],
+        "summary": "Đăng nhập hệ thống",
+        "description": "Xác thực bằng tên đăng nhập hoặc email và mật khẩu. Trả về JWT token có thời hạn.",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Xác thực & Người dùng"
+        ],
+        "summary": "Lấy thông tin tài khoản hiện tại",
+        "description": "Trả về thông tin hồ sơ của tài khoản đang đăng nhập (yêu cầu JWT token hợp lệ).",
+        "operationId": "get_current_user_api_auth_me_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/users": {
+      "get": {
+        "tags": [
+          "Xác thực & Người dùng"
+        ],
+        "summary": "Danh sách thành viên để phân công",
+        "description": "Lấy danh sách toàn bộ thành viên trong đội ngũ QA/QC để phân công nhiệm vụ kiểm thử.",
+        "operationId": "get_all_users_api_auth_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserOut"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Users Api Auth Users Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "put": {
+        "tags": [
+          "Xác thực & Người dùng"
+        ],
+        "summary": "Cập nhật hồ sơ cá nhân",
+        "description": "Cập nhật họ và tên và địa chỉ email của tài khoản đang đăng nhập.",
+        "operationId": "update_profile_api_auth_profile_put",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "put": {
+        "tags": [
+          "Xác thực & Người dùng"
+        ],
+        "summary": "Đổi mật khẩu bảo mật tài khoản",
+        "description": "Xác thực mật khẩu cũ bằng bcrypt và cập nhật mật khẩu mới.",
+        "operationId": "change_password_api_auth_change_password_put",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPasswordChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Danh sách toàn bộ dự án",
+        "description": "Lấy danh sách tất cả các dự án (Cá nhân & Nhóm) kèm chỉ số thống kê KPI kiểm thử và vai trò của bạn trong dự án.",
+        "operationId": "get_all_projects_api_projects_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectOut"
+                  },
+                  "title": "Response Get All Projects Api Projects Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Tạo dự án mới (Cá nhân hoặc Nhóm)",
+        "description": "Khởi tạo một dự án kiểm thử mới. Người tạo mặc định là Trưởng nhóm (Leader) và có quyền phân quyền cho thành viên khác.",
+        "operationId": "create_project_api_projects_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/join": {
+      "post": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Tham gia dự án nhóm bằng mã mời",
+        "description": "Thành viên tham gia vào dự án nhóm bằng mã mời tham gia (Join Code) hoặc mã dự án. Mặc định vai trò là Thành viên (Member).",
+        "operationId": "join_project_by_code_api_projects_join_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectJoinRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}": {
+      "get": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Chi tiết dự án và các chức năng con",
+        "description": "Lấy thông tin chi tiết của dự án bao gồm danh sách yêu cầu, bộ tham số bóc tách và các bộ Test Suite.",
+        "operationId": "get_project_details_api_projects__project_id__get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Cập nhật thông tin dự án",
+        "description": "Chỉnh sửa tên dự án, mã code, phiên bản, người phụ trách và chế độ dự án. Chỉ Trưởng nhóm (Leader) hoặc Phó nhóm (Deputy) mới có quyền thực hiện.",
+        "operationId": "update_project_api_projects__project_id__put",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Xóa dự án và toàn bộ dữ liệu",
+        "description": "Xóa vĩnh viễn dự án cùng toàn bộ dữ liệu. Chỉ duy nhất Trưởng nhóm (Leader) người sở hữu mới có quyền xóa.",
+        "operationId": "delete_project_api_projects__project_id__delete",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/members": {
+      "get": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Danh sách thành viên và phân quyền trong dự án",
+        "description": "Lấy danh sách toàn bộ thành viên trong dự án kèm vai trò (Leader, Deputy, Member) và vai trò của người dùng hiện tại.",
+        "operationId": "get_project_members_api_projects__project_id__members_get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Thêm thành viên vào dự án",
+        "description": "Trưởng nhóm hoặc Phó nhóm thêm một thành viên vào dự án thông qua tên đăng nhập hoặc email.",
+        "operationId": "add_project_member_api_projects__project_id__members_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectMemberAdd"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/members/{user_id}/role": {
+      "put": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Cập nhật vai trò thành viên (Phân quyền)",
+        "description": "Thay đổi vai trò thành viên (Leader, Deputy, Member). Chỉ DUY NHẤT Trưởng nhóm (Leader) mới có quyền phân quyền.",
+        "operationId": "update_member_role_api_projects__project_id__members__user_id__role_put",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectMemberRoleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/members/{user_id}": {
+      "delete": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Xóa thành viên khỏi dự án hoặc tự rời dự án",
+        "description": "Leader có thể xóa bất kỳ ai; Deputy có thể xóa Member; Thành viên có thể tự rời khỏi dự án.",
+        "operationId": "remove_project_member_api_projects__project_id__members__user_id__delete",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/export": {
+      "get": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Xuất báo cáo kiểm thử toàn diện cấp dự án",
+        "description": "Xuất báo cáo nghiệm thu toàn bộ dự án dưới dạng Excel (4 sheet chuyên nghiệp), CSV, JSON, hoặc Markdown.",
+        "operationId": "export_project_report_api_projects__project_id__export_get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "xlsx",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/seed-sample": {
+      "post": {
+        "tags": [
+          "Quản lý Dự án"
+        ],
+        "summary": "Nạp dự án mẫu E-Commerce Scrum để nghiệm thu đồ án",
+        "description": "Khởi tạo tự động một dự án mẫu Scrum hoàn chỉnh gồm 3 chức năng con, Sprint, phân công thành viên và 141 ca kiểm thử thực tế phục vụ demo nghiệm thu đồ án CDIO-4.",
+        "operationId": "seed_sample_project_api_projects_seed_sample_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sprints/project/{project_id}": {
+      "get": {
+        "tags": [
+          "Quản lý Sprint & Scrum"
+        ],
+        "summary": "Danh sách Sprint của dự án",
+        "description": "Lấy danh sách toàn bộ các chu kỳ Sprint trong dự án kèm chỉ số hoàn thành tiêu chuẩn Definition of Done (DoD).",
+        "operationId": "get_project_sprints_api_sprints_project__project_id__get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SprintOut"
+                  },
+                  "title": "Response Get Project Sprints Api Sprints Project  Project Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sprints": {
+      "post": {
+        "tags": [
+          "Quản lý Sprint & Scrum"
+        ],
+        "summary": "Tạo Sprint mới trong dự án",
+        "description": "Khởi tạo một chu kỳ Sprint mới với mục tiêu kiểm thử (Sprint Goal), ngày bắt đầu và kết thúc.",
+        "operationId": "create_sprint_api_sprints_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SprintCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SprintOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sprints/{sprint_id}": {
+      "put": {
+        "tags": [
+          "Quản lý Sprint & Scrum"
+        ],
+        "summary": "Cập nhật thông tin Sprint",
+        "description": "Chỉnh sửa tên Sprint, mục tiêu, ngày bắt đầu, ngày kết thúc hoặc trạng thái hoàn thành.",
+        "operationId": "update_sprint_api_sprints__sprint_id__put",
+        "parameters": [
+          {
+            "name": "sprint_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Sprint Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SprintUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SprintOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Quản lý Sprint & Scrum"
+        ],
+        "summary": "Xóa Sprint",
+        "description": "Xóa chu kỳ Sprint và gỡ bỏ liên kết của các chức năng con thuộc Sprint này.",
+        "operationId": "delete_sprint_api_sprints__sprint_id__delete",
+        "parameters": [
+          {
+            "name": "sprint_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Sprint Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requirements/project/{project_id}": {
+      "get": {
+        "tags": [
+          "Chức năng & Yêu cầu"
+        ],
+        "summary": "Danh sách chức năng con trong dự án",
+        "description": "Lấy danh sách tất cả các chức năng con (User Stories / Requirements) trong dự án kèm chỉ số kiểm thử.",
+        "operationId": "get_project_requirements_api_requirements_project__project_id__get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementOut"
+                  },
+                  "title": "Response Get Project Requirements Api Requirements Project  Project Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requirements": {
+      "post": {
+        "tags": [
+          "Chức năng & Yêu cầu"
+        ],
+        "summary": "Tạo chức năng con / User Story mới",
+        "description": "Tạo một chức năng mới trong dự án kèm đặc tả yêu cầu, người thực hiện, thời hạn và độ ưu tiên.",
+        "operationId": "create_requirement_api_requirements_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequirementCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requirements/{requirement_id}": {
+      "put": {
+        "tags": [
+          "Chức năng & Yêu cầu"
+        ],
+        "summary": "Cập nhật chức năng, phân công và trạng thái",
+        "description": "Chỉnh sửa tiêu đề, đặc tả yêu cầu, phân công người kiểm thử (Assignee), thời hạn (Due Date) hoặc cập nhật tiến độ (planning / in_testing / completed).",
+        "operationId": "update_requirement_api_requirements__requirement_id__put",
+        "parameters": [
+          {
+            "name": "requirement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Requirement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequirementUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chức năng & Yêu cầu"
+        ],
+        "summary": "Xóa chức năng con",
+        "description": "Xóa vĩnh viễn chức năng con cùng toàn bộ tham số và các bộ ca kiểm thử liên quan.",
+        "operationId": "delete_requirement_api_requirements__requirement_id__delete",
+        "parameters": [
+          {
+            "name": "requirement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Requirement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/parse": {
+      "post": {
+        "tags": [
+          "Bóc tách Ngữ nghĩa"
+        ],
+        "summary": "Bóc tách đặc tả yêu cầu và trích xuất tham số",
+        "description": "Nhận văn bản đặc tả yêu cầu kiểm thử tiếng Việt, tự động bóc tách tham số, nhận diện kiểu dữ liệu và lưu vào hệ thống.",
+        "operationId": "parse_requirement_text_api_parse_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generate": {
+      "post": {
+        "tags": [
+          "Sinh Ca Kiểm Thử"
+        ],
+        "summary": "Sinh bộ ca kiểm thử tự động theo kỹ thuật",
+        "description": "Nhận danh sách tham số và lựa chọn kỹ thuật kiểm thử (BVA, Phân vùng tương đương, Pairwise, Z3 Solver) để sinh bộ test case hoàn chỉnh.",
+        "operationId": "generate_test_cases_api_generate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/testcases/{tc_id}": {
+      "patch": {
+        "tags": [
+          "Sinh Ca Kiểm Thử"
+        ],
+        "summary": "Cập nhật kết quả kiểm thử thực tế (Pass/Fail)",
+        "description": "Cập nhật trạng thái thực thi (Pass, Fail, Blocked, Untested) và kết quả thực tế (Actual Result) của ca kiểm thử.",
+        "operationId": "update_test_case_api_testcases__tc_id__patch",
+        "parameters": [
+          {
+            "name": "tc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Tc Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestCaseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/suites/{suite_id}": {
+      "get": {
+        "tags": [
+          "Sinh Ca Kiểm Thử"
+        ],
+        "summary": "Chi tiết bộ Test Suite và danh sách ca kiểm thử",
+        "description": "Lấy chi tiết bộ kiểm thử (TestSuite) kèm độ bao phủ Pairwise và toàn bộ các ca kiểm thử bên trong.",
+        "operationId": "get_suite_details_api_suites__suite_id__get",
+        "parameters": [
+          {
+            "name": "suite_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Suite Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/{suite_id}": {
+      "get": {
+        "tags": [
+          "Xuất Báo Cáo"
+        ],
+        "summary": "Xuất bộ ca kiểm thử (Excel 2 sheet, CSV, JSON, Markdown)",
+        "description": "Xuất khẩu dữ liệu ca kiểm thử của bộ Test Suite ra các định dạng chuẩn: Excel chuyên nghiệp (Báo cáo tổng kết + Chi tiết ca test), CSV, JSON, hoặc bảng Markdown.",
+        "operationId": "export_test_suite_api_export__suite_id__get",
+        "parameters": [
+          {
+            "name": "suite_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Suite Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "xlsx",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Root",
+        "description": "Thông tin cơ bản về API.",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Health Check",
+        "description": "Kiểm tra trạng thái hoạt động của API.",
+        "operationId": "health_check_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthResponse": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "user"
+        ],
+        "title": "AuthResponse"
+      },
+      "GenerateRequest": {
+        "properties": {
+          "requirement_id": {
+            "type": "integer",
+            "title": "Requirement Id"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/ParameterBase"
+            },
+            "type": "array",
+            "title": "Parameters"
+          },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques",
+            "default": [
+              "bva",
+              "ep",
+              "pairwise"
+            ]
+          },
+          "constraints": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Constraints",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "requirement_id",
+          "parameters"
+        ],
+        "title": "GenerateRequest",
+        "description": "Client gui danh sach tham so (da chinh sua) de sinh test cases."
+      },
+      "GenerateResponse": {
+        "properties": {
+          "test_suite_id": {
+            "type": "integer",
+            "title": "Test Suite Id"
+          },
+          "requirement_id": {
+            "type": "integer",
+            "title": "Requirement Id"
+          },
+          "total_cases": {
+            "type": "integer",
+            "title": "Total Cases"
+          },
+          "coverage_info": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Coverage Info",
+            "default": {}
+          },
+          "test_cases": {
+            "items": {
+              "$ref": "#/components/schemas/TestCaseOut"
+            },
+            "type": "array",
+            "title": "Test Cases"
+          }
+        },
+        "type": "object",
+        "required": [
+          "test_suite_id",
+          "requirement_id",
+          "total_cases",
+          "test_cases"
+        ],
+        "title": "GenerateResponse",
+        "description": "Ket qua sinh test cases."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ParameterBase": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "data_type": {
+            "type": "string",
+            "title": "Data Type"
+          },
+          "min_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Value"
+          },
+          "max_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Value"
+          },
+          "min_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Length"
+          },
+          "max_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Length"
+          },
+          "enum_values": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enum Values"
+          },
+          "regex_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regex Pattern"
+          },
+          "is_required": {
+            "type": "boolean",
+            "title": "Is Required",
+            "default": true
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "data_type"
+        ],
+        "title": "ParameterBase"
+      },
+      "ParameterOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "data_type": {
+            "type": "string",
+            "title": "Data Type"
+          },
+          "min_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Value"
+          },
+          "max_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Value"
+          },
+          "min_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Length"
+          },
+          "max_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Length"
+          },
+          "enum_values": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enum Values"
+          },
+          "regex_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regex Pattern"
+          },
+          "is_required": {
+            "type": "boolean",
+            "title": "Is Required",
+            "default": true
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "data_type"
+        ],
+        "title": "ParameterOut"
+      },
+      "ParseRequest": {
+        "properties": {
+          "raw_text": {
+            "type": "string",
+            "title": "Raw Text"
+          },
+          "format_type": {
+            "type": "string",
+            "title": "Format Type",
+            "default": "free_text"
+          },
+          "project_name": {
+            "type": "string",
+            "title": "Project Name",
+            "default": "Default Project"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "raw_text"
+        ],
+        "title": "ParseRequest",
+        "description": "Client gui van ban dac ta de backend boc tach tham so."
+      },
+      "ParseResponse": {
+        "properties": {
+          "requirement_id": {
+            "type": "integer",
+            "title": "Requirement Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/ParameterOut"
+            },
+            "type": "array",
+            "title": "Parameters"
+          },
+          "actor": {
+            "type": "string",
+            "title": "Actor",
+            "default": ""
+          },
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "default": ""
+          },
+          "preconditions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Preconditions",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "requirement_id",
+          "title",
+          "parameters"
+        ],
+        "title": "ParseResponse",
+        "description": "Ket qua boc tach: danh sach tham so + metadata."
+      },
+      "ProjectCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "1.0.0"
+          },
+          "lead": {
+            "type": "string",
+            "title": "Lead",
+            "default": "QA Lead"
+          },
+          "project_type": {
+            "type": "string",
+            "title": "Project Type",
+            "default": "personal"
+          },
+          "join_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ProjectCreate"
+      },
+      "ProjectJoinRequest": {
+        "properties": {
+          "join_code": {
+            "type": "string",
+            "title": "Join Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "join_code"
+        ],
+        "title": "ProjectJoinRequest"
+      },
+      "ProjectMemberAdd": {
+        "properties": {
+          "user_identifier": {
+            "type": "string",
+            "title": "User Identifier"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": "member"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_identifier"
+        ],
+        "title": "ProjectMemberAdd"
+      },
+      "ProjectMemberRoleUpdate": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "title": "ProjectMemberRoleUpdate"
+      },
+      "ProjectOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "1.0.0"
+          },
+          "lead": {
+            "type": "string",
+            "title": "Lead",
+            "default": "QA Lead"
+          },
+          "project_type": {
+            "type": "string",
+            "title": "Project Type",
+            "default": "personal"
+          },
+          "join_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Code"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "requirements_count": {
+            "type": "integer",
+            "title": "Requirements Count",
+            "default": 0
+          },
+          "test_suites_count": {
+            "type": "integer",
+            "title": "Test Suites Count",
+            "default": 0
+          },
+          "total_cases": {
+            "type": "integer",
+            "title": "Total Cases",
+            "default": 0
+          },
+          "pass_count": {
+            "type": "integer",
+            "title": "Pass Count",
+            "default": 0
+          },
+          "fail_count": {
+            "type": "integer",
+            "title": "Fail Count",
+            "default": 0
+          },
+          "untested_count": {
+            "type": "integer",
+            "title": "Untested Count",
+            "default": 0
+          },
+          "pass_rate": {
+            "type": "number",
+            "title": "Pass Rate",
+            "default": 0.0
+          },
+          "owner_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Id"
+          },
+          "owner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Name"
+          },
+          "current_user_role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current User Role",
+            "default": "member"
+          },
+          "members_count": {
+            "type": "integer",
+            "title": "Members Count",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id"
+        ],
+        "title": "ProjectOut"
+      },
+      "ProjectUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "lead": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead"
+          },
+          "project_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Type"
+          }
+        },
+        "type": "object",
+        "title": "ProjectUpdate"
+      },
+      "RequirementCreate": {
+        "properties": {
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "raw_text": {
+            "type": "string",
+            "title": "Raw Text"
+          },
+          "format_type": {
+            "type": "string",
+            "title": "Format Type",
+            "default": "free_text"
+          },
+          "sprint_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sprint Id"
+          },
+          "assignee_name": {
+            "type": "string",
+            "title": "Assignee Name",
+            "default": ""
+          },
+          "due_date": {
+            "type": "string",
+            "title": "Due Date",
+            "default": ""
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": "Medium"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "planning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project_id",
+          "title",
+          "raw_text"
+        ],
+        "title": "RequirementCreate"
+      },
+      "RequirementOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id"
+          },
+          "sprint_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sprint Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "raw_text": {
+            "type": "string",
+            "title": "Raw Text"
+          },
+          "format_type": {
+            "type": "string",
+            "title": "Format Type"
+          },
+          "assignee_name": {
+            "type": "string",
+            "title": "Assignee Name",
+            "default": ""
+          },
+          "due_date": {
+            "type": "string",
+            "title": "Due Date",
+            "default": ""
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": "Medium"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "planning"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "parameters_count": {
+            "type": "integer",
+            "title": "Parameters Count",
+            "default": 0
+          },
+          "test_suites_count": {
+            "type": "integer",
+            "title": "Test Suites Count",
+            "default": 0
+          },
+          "total_cases": {
+            "type": "integer",
+            "title": "Total Cases",
+            "default": 0
+          },
+          "pass_count": {
+            "type": "integer",
+            "title": "Pass Count",
+            "default": 0
+          },
+          "fail_count": {
+            "type": "integer",
+            "title": "Fail Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "project_id",
+          "title",
+          "raw_text",
+          "format_type"
+        ],
+        "title": "RequirementOut"
+      },
+      "RequirementUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "raw_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Text"
+          },
+          "format_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Format Type"
+          },
+          "sprint_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sprint Id"
+          },
+          "assignee_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignee Name"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "title": "RequirementUpdate"
+      },
+      "SprintCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "goal": {
+            "type": "string",
+            "title": "Goal",
+            "default": ""
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": ""
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "active"
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "project_id"
+        ],
+        "title": "SprintCreate"
+      },
+      "SprintOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "goal": {
+            "type": "string",
+            "title": "Goal",
+            "default": ""
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": ""
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "active"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "requirements_count": {
+            "type": "integer",
+            "title": "Requirements Count",
+            "default": 0
+          },
+          "total_cases": {
+            "type": "integer",
+            "title": "Total Cases",
+            "default": 0
+          },
+          "pass_count": {
+            "type": "integer",
+            "title": "Pass Count",
+            "default": 0
+          },
+          "fail_count": {
+            "type": "integer",
+            "title": "Fail Count",
+            "default": 0
+          },
+          "pass_rate": {
+            "type": "number",
+            "title": "Pass Rate",
+            "default": 0.0
+          },
+          "dod_met": {
+            "type": "boolean",
+            "title": "Dod Met",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "project_id"
+        ],
+        "title": "SprintOut"
+      },
+      "SprintUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "title": "SprintUpdate"
+      },
+      "TestCaseOut": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "scenario": {
+            "type": "string",
+            "title": "Scenario"
+          },
+          "preconditions": {
+            "type": "string",
+            "title": "Preconditions",
+            "default": ""
+          },
+          "test_steps": {
+            "type": "string",
+            "title": "Test Steps",
+            "default": ""
+          },
+          "test_type": {
+            "type": "string",
+            "title": "Test Type"
+          },
+          "input_data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Input Data"
+          },
+          "expected_result": {
+            "type": "string",
+            "title": "Expected Result"
+          },
+          "actual_result": {
+            "type": "string",
+            "title": "Actual Result",
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "Untested"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": "Medium"
+          },
+          "technique_source": {
+            "type": "string",
+            "title": "Technique Source",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "scenario",
+          "test_type",
+          "input_data",
+          "expected_result"
+        ],
+        "title": "TestCaseOut"
+      },
+      "UserLogin": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "UserLogin"
+      },
+      "UserOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email",
+          "full_name",
+          "role"
+        ],
+        "title": "UserOut"
+      },
+      "UserPasswordChange": {
+        "properties": {
+          "old_password": {
+            "type": "string",
+            "title": "Old Password"
+          },
+          "new_password": {
+            "type": "string",
+            "title": "New Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "old_password",
+          "new_password"
+        ],
+        "title": "UserPasswordChange"
+      },
+      "UserProfileUpdate": {
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "full_name",
+          "email"
+        ],
+        "title": "UserProfileUpdate"
+      },
+      "UserRegister": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "default": "user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "email",
+          "full_name",
+          "password"
+        ],
+        "title": "UserRegister"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Xác thực & Người dùng",
+      "description": "Quản lý tài khoản người dùng, đăng ký, đăng nhập bằng JWT và danh sách thành viên phục vụ phân công kiểm thử."
+    },
+    {
+      "name": "Quản lý Dự án",
+      "description": "Khởi tạo và quản lý dự án cá nhân hoặc nhóm, tạo mã tham gia (Join Code), đo lường KPI và xuất báo cáo nghiệm thu."
+    },
+    {
+      "name": "Quản lý Sprint & Scrum",
+      "description": "Quản lý chu kỳ kiểm thử theo mô hình Scrum/Agile, mục tiêu Sprint và đo lường tiêu chuẩn hoàn thành Definition of Done (DoD)."
+    },
+    {
+      "name": "Chức năng & Yêu cầu",
+      "description": "Quản lý các chức năng con (User Stories), phân công người kiểm thử (Assignee), thời hạn và độ ưu tiên."
+    },
+    {
+      "name": "Bóc tách Ngữ nghĩa",
+      "description": "Phân tích tự động văn bản đặc tả yêu cầu tiếng Việt, trích xuất không gian biến, miền giá trị và kiểu dữ liệu."
+    },
+    {
+      "name": "Sinh Ca Kiểm Thử",
+      "description": "Động cơ sinh ca kiểm thử tự động áp dụng phân tích giá trị biên (BVA), phân vùng tương đương (EP), kiểm thử từng cặp Pairwise và giải ràng buộc Z3."
+    },
+    {
+      "name": "Xuất Báo Cáo",
+      "description": "Xuất dữ liệu kiểm thử và báo cáo nghiệm thu chuyên nghiệp ra các định dạng Excel (.xlsx), CSV, JSON và Markdown."
+    }
+  ]
+}

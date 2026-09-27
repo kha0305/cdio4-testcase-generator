@@ -1,0 +1,45 @@
+$kind: http-request
+url: "{{base_url}}/api/generate"
+method: POST
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "requirement_id": {{requirement_id}},
+      "techniques": ["bva", "ep", "pairwise"],
+      "constraints": [],
+      "parameters": [
+        {
+          "name": "tuoi",
+          "data_type": "integer",
+          "min_value": 18,
+          "max_value": 65,
+          "is_required": true,
+          "description": "Tuổi người dùng"
+        },
+        {
+          "name": "mat_khau",
+          "data_type": "string",
+          "min_length": 6,
+          "max_length": 20,
+          "is_required": true,
+          "description": "Mật khẩu tài khoản"
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Sinh thanh cong (200)', () => pm.response.to.have.status(200));
+      var res = pm.response.json();
+      pm.test('Co test case', () => pm.expect(res.test_cases).to.be.an('array').with.length.above(0));
+      pm.test('Co thong tin coverage', () => pm.expect(res.coverage_info).to.be.an('object'));
+      if (res.test_suite_id) {
+          pm.collectionVariables.set('suite_id', res.test_suite_id.toString());
+          console.log('suite_id:', res.test_suite_id, '| Tong test case:', res.total_cases);
+      }
+    language: text/javascript
+order: 2000

@@ -1,0 +1,36 @@
+$kind: http-request
+url: "{{base_url}}/api/generate"
+method: POST
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "requirement_id": {{requirement_id}},
+      "techniques": ["bva", "ep", "pairwise"],
+      "constraints": [
+        "tuoi >= 18",
+        "tuoi + kinh_nghiem >= 20"
+      ],
+      "parameters": [
+        {
+          "name": "tuoi",
+          "data_type": "integer",
+          "min_value": 18,
+          "max_value": 65,
+          "is_required": true,
+          "description": "Tuổi ứng viên"
+        },
+        {
+          "name": "kinh_nghiem",
+          "data_type": "integer",
+          "min_value": 0,
+          "max_value": 40,
+          "is_required": true,
+          "description": "Số năm kinh nghiệm"
+        }
+      ]
+    }
+order: 3000

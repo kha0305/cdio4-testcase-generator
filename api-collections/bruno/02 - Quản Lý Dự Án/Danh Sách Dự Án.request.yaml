@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{base_url}}/api/projects"
+method: GET
+headers:
+  Authorization: Bearer {{token}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Thanh cong (200)', () => pm.response.to.have.status(200));
+      var res = pm.response.json();
+      pm.test('Tra ve mang', () => pm.expect(res).to.be.an('array'));
+      if (res.length > 0) {
+          pm.collectionVariables.set('project_id', res[0].id.toString());
+          console.log('project_id da luu:', res[0].id);
+      }
+    language: text/javascript
+order: 1000

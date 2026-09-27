@@ -1,0 +1,17 @@
+$kind: http-request
+name: Lấy Thông Tin Tài Khoản /me
+url: "{{base_url}}/api/auth/me"
+method: GET
+headers:
+  Authorization: Bearer {{token}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Thanh cong (200)', () => pm.response.to.have.status(200));
+      pm.test('Dung thong tin user', () => {
+          var res = pm.response.json();
+          pm.expect(res).to.have.property('id');
+          pm.expect(res).to.have.property('username');
+      });
+    language: text/javascript
+order: 5000

@@ -1,0 +1,17 @@
+$kind: collection
+description: |-
+  Postman Collection đầy đủ cho API CDIO-4. 
+
+  **Hướng dẫn dùng:**
+  1. Import collection này vào Postman
+  2. Tạo Environment với biến `base_url = http://localhost:8000`
+  3. Chạy request **Đăng Nhập** — token JWT sẽ tự động được lưu vào biến `{{token}}`
+  4. Toàn bộ request khác sẽ dùng token đó tự động
+variables:
+  base_url: http://localhost:8000
+  token: ""
+  project_id: "1"
+  sprint_id: "1"
+  requirement_id: "1"
+  suite_id: "1"
+  user_id: "1"

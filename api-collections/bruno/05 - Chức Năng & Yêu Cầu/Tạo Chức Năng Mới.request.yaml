@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{base_url}}/api/requirements"
+method: POST
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "project_id": {{project_id}},
+      "title": "Kiểm Tra Đăng Ký Tài Khoản",
+      "raw_text": "Người dùng phải nhập họ tên từ 2 đến 100 ký tự, email hợp lệ, tuổi từ 18 đến 65, mật khẩu từ 6 đến 20 ký tự. Hệ thống tạo tài khoản thành công khi tất cả thông tin hợp lệ.",
+      "format_type": "free_text",
+      "sprint_id": {{sprint_id}},
+      "assignee_name": "Nguyễn Văn A",
+      "due_date": "2026-10-10",
+      "priority": "High",
+      "status": "planning"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Tao thanh cong', () => pm.expect(pm.response.code).to.be.oneOf([200,201]));
+      var res = pm.response.json();
+      if (res.id) pm.collectionVariables.set('requirement_id', res.id.toString());
+    language: text/javascript
+order: 2000

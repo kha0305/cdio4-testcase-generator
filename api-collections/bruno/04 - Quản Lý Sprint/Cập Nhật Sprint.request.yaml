@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{base_url}}/api/sprints/{{sprint_id}}"
+method: PUT
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "completed",
+      "goal": "Mục tiêu đã hoàn thành — tỉ lệ Pass đạt 95%"
+    }
+order: 3000

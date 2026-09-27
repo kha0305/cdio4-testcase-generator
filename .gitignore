@@ -1,0 +1,69 @@
+# ==============================================================================
+# Monorepo Root .gitignore - CDIO-4 Hệ Thống Tự Động Sinh Test Case
+# ==============================================================================
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyd
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets (TUYỆT ĐỐI KHÔNG COMMIT BÍ MẬT)
+.env
+.env.*
+!.env.example
+
+# SQLite Database & Storage (Cơ sở dữ liệu nội bộ không commit)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# IDEs & System files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Log files
+*.log
+logs/

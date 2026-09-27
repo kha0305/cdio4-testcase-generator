@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{base_url}}/api/testcases/1"
+method: PATCH
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "Pass",
+      "actual_result": "Hệ thống hiển thị thông báo thành công và chuyển hướng đến trang chủ đúng theo thiết kế"
+    }
+order: 6000

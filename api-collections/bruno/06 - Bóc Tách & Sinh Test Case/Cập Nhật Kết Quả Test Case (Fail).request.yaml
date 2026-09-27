@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{base_url}}/api/testcases/2"
+method: PATCH
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "Fail",
+      "actual_result": "Hệ thống báo lỗi 500 thay vì hiển thị thông báo hợp lệ — Bug #123"
+    }
+order: 7000

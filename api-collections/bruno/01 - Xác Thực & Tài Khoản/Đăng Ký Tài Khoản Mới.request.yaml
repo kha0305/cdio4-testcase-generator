@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{base_url}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "qalead",
+      "email": "qalead@cdio.edu.vn",
+      "full_name": "Trưởng Nhóm QA",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      var res = pm.response.json();
+      if (res.token) {
+          pm.collectionVariables.set('token', res.token);
+          pm.collectionVariables.set('user_id', res.user.id.toString());
+          console.log('Token da luu:', res.token.substring(0, 30) + '...');
+      }
+      pm.test('Dang ky thanh cong (201)', () => pm.response.to.have.status(201));
+      pm.test('Co token JWT', () => pm.expect(res.token).to.match(/^eyJ/));
+      pm.test('Co thong tin user', () => pm.expect(res.user.username).to.be.a('string'));
+    language: text/javascript
+order: 1000

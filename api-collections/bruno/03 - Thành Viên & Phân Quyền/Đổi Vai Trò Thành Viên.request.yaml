@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/api/projects/{{project_id}}/members/{{user_id}}/role"
+method: PUT
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "role": "deputy"
+    }
+order: 3000

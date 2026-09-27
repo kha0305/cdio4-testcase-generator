@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{base_url}}/api/projects/{{project_id}}"
+method: PUT
+headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Dự Án E-Commerce CDIO (v2)",
+      "version": "2.0.0",
+      "description": "Phiên bản cập nhật với đầy đủ tính năng"
+    }
+order: 4000
