@@ -415,15 +415,48 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
 - **Tập tin can thiệp**:
   - `d:/Do-an/CDIO-4/code/.gitignore`
   - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
-- **Trạng thái**: **[DANG THUC HIEN]**
+- **Kết quả thực hiện**:
+  - Đã khởi tạo thành công tập tin [.gitignore](file:///d:/Do-an/CDIO-4/code/.gitignore) tại thư mục gốc Monorepo, bảo vệ toàn diện các tệp nhạy cảm (loại trừ `node_modules/`, `dist/`, `.env`, `*.db`, `*.db-shm`, `*.db-wal`, `__pycache__/`, `*.pyc`).
+  - Đã khởi tạo Git repository nội bộ, cấu hình nhánh chính `main` và liên kết remote `origin` trỏ về `https://github.com/kha0305/cdio4-testcase-generator.git`.
+  - Đã tạo bản commit sạch sẽ: `feat: khoi tao he thong tu dong sinh test case CDIO-4 (Backend FastAPI + Frontend React)`.
+  - Đã thực hiện `git push -u origin main` thành công 100%, nhánh `main` trên GitHub hiện đã đồng bộ hoàn toàn với mã nguồn cục bộ.
+- **Trạng thái**: **[HOAN TAT]**
+
+### Checkpoint #020 — Soạn Thảo Toàn Diện Tài Liệu README.md Chuẩn Quốc Tế & Đẩy Lên GitHub
+- **Mục tiêu**:
+  1. Đáp ứng yêu cầu trực tiếp của người dùng: *"chưa viết readme, viết readme cho chuẩn, chi tiết và đầy đủ"*.
+  2. Xây dựng tập tin `README.md` tại thư mục gốc Monorepo (`d:/Do-an/CDIO-4/code/README.md`) đạt tiêu chuẩn đồ án kỹ thuật phần mềm xuất sắc:
+     - Giới thiệu dự án, bối cảnh đồ án CDIO-4, mục tiêu và giá trị thực tiễn.
+     - Danh sách đầy đủ 8 tính năng kỹ thuật cốt lõi (Động cơ Anti-Vibe Coder, Z3 Solver, BVA, Pairwise, Scrum DoD, RBAC 3 cấp, Lịch phân công, Xuất báo cáo 4 định dạng).
+     - Kiến trúc công nghệ (FastAPI, React Vite, SQLite WAL, Times New Roman Design System).
+     - Sơ đồ cấu trúc thư mục Monorepo chuẩn quốc tế.
+     - Hướng dẫn cài đặt & khởi chạy 1 lệnh trên Windows/Linux.
+     - Bộ sưu tập API thử nghiệm (Postman & Bruno) và tài khoản mẫu mặc định.
+     - Bộ tiêu chuẩn phát triển `AGENTS.md` (100% tiếng Việt, không emoji, ISO 29119, ISTQB).
+  3. Thực hiện `git add README.md`, commit và push lên GitHub.
+- **Tập tin can thiệp**:
+  - `d:/Do-an/CDIO-4/code/README.md`
+  - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
+- **Kết quả thực hiện**:
+  - Đã soạn thảo hoàn chỉnh tài liệu [README.md](file:///d:/Do-an/CDIO-4/code/README.md) chuẩn quốc tế, cấu trúc 9 phần chi tiết:
+    1. Tổng quan đề tài CDIO-4 & phân tích các bài toán giải quyết.
+    2. Chi tiết 7 tính năng kỹ thuật cốt lõi (Anti-Vibe Coder, Single Fault Assumption, Z3 SMT Solver, BVA 6 điểm biên, Pairwise, Agile/Scrum DoD, RBAC 3 cấp, Xuất báo cáo 4 định dạng, 32 chuyên mục tài liệu).
+    3. Công nghệ sử dụng đầy đủ cho cả Backend FastAPI và Frontend React Vite.
+    4. Sơ đồ cấu trúc thư mục Monorepo chuẩn quốc tế.
+    5. Hướng dẫn cài đặt & khởi chạy 1-Click trên Windows và lệnh Terminal Monorepo.
+    6. Danh sách tài khoản mẫu và script nạp lại dữ liệu đồ án mẫu E-Commerce.
+    7. Bộ kiểm thử tích hợp tự động 18 bước (100% Pass).
+    8. Bộ tiêu chuẩn chất lượng theo AGENTS.md (không emoji, 100% tiếng Việt có dấu, chuẩn ISO 29119 & ISTQB).
+    9. Thông tin bản quyền & liên kết GitHub.
+  - Tuân thủ nghiêm ngặt 100% tiếng Việt có dấu, hoàn toàn không sử dụng Unicode Emoji.
+- **Trạng thái**: **[HOAN TAT]**
 
 ---
 
 ## 4. KẾ HOẠCH HÀNH ĐỘNG TIẾP THEO (NEXT ACTION ITEMS)
-- **Kế hoạch 1**: Tạo `.gitignore` chuẩn Monorepo tại gốc dự án.
-- **Kế hoạch 2**: Khởi tạo Git repository, add remote `https://github.com/kha0305/cdio4-testcase-generator.git`.
-- **Kế hoạch 3**: Commit toàn bộ mã nguồn sạch sẽ và đẩy lên nhánh `main`.
-- **Kế hoạch 4**: Cập nhật Checkpoint #019 sang `[HOAN TAT]`.
+- **Kế hoạch 1**: Tiếp tục đọc tập tin này ngay đầu mỗi phiên giao tiếp hoặc trước bất kỳ lệnh sửa code nào theo đúng Điều 8 AGENTS.md.
+- **Kế hoạch 2**: Sẵn sàng phục vụ yêu cầu kiểm thử, bổ sung tính năng hoặc điều chỉnh giao diện tiếp theo của người dùng.
+
 
 
 
