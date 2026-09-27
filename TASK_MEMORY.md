@@ -547,30 +547,42 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
   - Đã bổ sung tính năng cấu hình URL Máy Chủ Backend tùy chọn trong [frontend/src/components/AuthModal.jsx](file:///d:/Do-an/CDIO-4/code/frontend/src/components/AuthModal.jsx).
   - Bản build production `npm run build` hoàn thành trong 281ms không có cảnh báo/lỗi nào.
 ### Checkpoint #026 — Tao Nhanh Trien Khai Backend Tren May Chu Pikamc (deploy/pikamc-backend)
-- **Muc tieu**:
-  1. Tao nhanh `deploy/pikamc-backend` tu nhanh `main` trong kho CDIO-4 de trien khai chi rieng Backend FastAPI len may chu Pikamc (Node.js 22 Docker container).
-  2. Them `server.js` bootstrap tu dong cai dat thu vien Python va khoi chay uvicorn FastAPI.
-  3. Them `ecosystem.config.cjs` cho PM2 de quan ly tien trinh chay nen.
-  4. Mo rong CORS origins trong `backend/main.py` de chap nhan ket noi tu GitHub Pages va domain Pikamc.
-  5. Huong dan nguoi dung dien form Khoi Dong tren Pikamc Control Panel.
-- **Tap tin can thiep**:
-  - `server.js` (Tao moi — bootstrap khoi chay Python/uvicorn)
-  - `ecosystem.config.cjs` (Tao moi — PM2 config)
-  - `backend/main.py` (Cap nhat CORS origins)
-  - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
-- **Ket qua thuc hien**:
+- **Ket qua thuc hien (da cap nhat)**:
   - Da tao nhanh `deploy/pikamc-backend` va day len GitHub thanh cong.
-  - `server.js` tu dong phat hien Python, cai goi pip, khoi chay uvicorn cong 25148.
-  - `ecosystem.config.cjs` cau hinh PM2 voi ten `cdio4-autotest-backend`, tu khoi dong lai khi gap loi.
-  - CORS mo rong them: `https://kha0305.github.io`, `https://dtu-portal.server.id.vn`.
-  - Dang thuc hien tiep: Cap nhat `server.js` de xu ly may chu Node.js 22 khong co Python san co (tu dong cai `python3` qua `apt-get`).
-- **Trang thai**: **[DANG THUC HIEN]**
+  - `d:/Do-an/CDIO-4/code/server.js`: bootstrap tu dong phat hien Python, cai goi pip, khoi chay uvicorn.
+  - `d:/Do-an/CDIO-4/code/ecosystem.config.cjs`: PM2 config, ten `cdio4-autotest-backend`, tu khoi dong lai khi gap loi.
+  - `d:/Do-an/CDIO-4/code/backend/main.py`: CORS mo rong them `https://kha0305.github.io`, `https://dtu-portal.server.id.vn`.
+  - Quyet dinh cuoi: Khong dung may chu rieng, tich hop vao search-exam hien tai qua SFTP.
+- **Trang thai**: **[HOAN TAT]**
+
+---
+
+### Checkpoint #027 — Tich Hop CDIO-4 Backend Vao May Chu Pikamc Hien Tai (search-exam subprocess)
+- **Muc tieu**:
+  - Chay CDIO-4 FastAPI backend nhu mot subprocess trong `server.js` cua du an search-exam dang chay tren may chu Pikamc, tranh viec ghi de code cu.
+  - Cong su dung: **25145** (khong xung dot voi 25146 — search-exam backend, 25147 — video streaming).
+- **Tap tin can thiep**:
+  - `D:\tool\search-exam\exam-lookup-system\server.js` — Them doan khoi chay CDIO-4 subprocess.
+  - `D:\tool\search-exam\cdio4-upload-staging\cdio4-backend\` — Thu muc backend CDIO-4 dong goi san de upload SFTP.
+  - `D:\tool\search-exam\cdio4-pikamc-upload.zip` — Goi upload hoan chinh (62 KB).
+- **Ket qua thuc hien**:
+  - `server.js` search-exam: them khoi `cdio4-backend/` subprocess khoi dong FastAPI tai cong 25145.
+  - Tu dong cai goi pip tu `cdio4-backend/requirements.txt` khi khoi dong.
+  - Tu dong khoi dong lai CDIO-4 sau 5s neu gap loi.
+  - Da doi cong tu 25148 -> **25145** theo yeu cau nguoi dung.
+  - Goi upload da san sang tai: `D:\tool\search-exam\cdio4-pikamc-upload.zip`
+  - Buoc tiep theo: Nguoi dung upload 2 thu len host qua Pikamc SFTP:
+    1. Thu muc `cdio4-backend/` -> `/home/container/cdio4-backend/`
+    2. File `server.js` moi -> `/home/container/server.js` (ghi de)
+    3. Khoi dong lai may chu tren Pikamc Control Panel.
+- **Trang thai**: **[HOAN TAT — CHO NGUOI DUNG UPLOAD SFTP]**
 
 ---
 
 ## 4. KE HOACH HANH DONG TIEP THEO (NEXT ACTION ITEMS)
 - **Ke hoach 1**: Tiep tuc doc tap tin nay ngay dau moi phien giao tiep hoac truoc bat ky lenh sua code nao theo dung Dieu 8 AGENTS.md.
-- **Ke hoach 2**: San sang phuc vu yeu cau kiem thu, bo sung tinh nang hoac dieu chinh giao dien tiep theo cua nguoi dung.
+- **Ke hoach 2**: Sau khi nguoi dung upload SFTP xong, kiem tra log Pikamc xem CDIO-4 FastAPI da khoi dong thanh cong chua (tim dong `[cdio4] Application startup complete.`).
+- **Ke hoach 3**: Cap nhat URL backend trong GitHub Pages frontend de tro ve cong 25145 tren host Pikamc.
 
 
 
