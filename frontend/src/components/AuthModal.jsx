@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { loginUser, registerUser } from "../api";
-import { IconUser, IconX, IconCheck, IconAlertTriangle, IconLoader, IconUsers } from "../icons";
+import { loginUser, registerUser, getApiBase, setApiBase } from "../api";
+import { IconUser, IconX, IconCheck, IconAlertTriangle, IconLoader, IconSettings } from "../icons";
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [tab, setTab] = useState("login"); // "login" | "register"
@@ -11,6 +11,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [role, setRole] = useState("tester");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showServerConfig, setShowServerConfig] = useState(false);
+  const [apiUrl, setApiUrl] = useState(() => getApiBase());
+  const [apiSuccessMsg, setApiSuccessMsg] = useState("");
 
   if (!isOpen) return null;
 
@@ -209,6 +212,76 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               {tab === "login" ? "Đăng Nhập" : "Tạo Tài Khoản"}
             </button>
           </form>
+
+          {/* Cấu hình máy chủ API tùy chọn */}
+          <div style={{ marginTop: "var(--space-3)", borderTop: "1px dashed var(--color-border)", paddingTop: "var(--space-2)" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+                fontSize: "11px",
+                color: "var(--color-text-secondary)",
+              }}
+              onClick={() => setShowServerConfig(!showServerConfig)}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <IconSettings width={12} height={12} />
+                Cấu hình Máy Chủ API Backend (Tùy chọn)
+              </span>
+              <span style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+                {showServerConfig ? "Thu gọn" : "Tùy chỉnh"}
+              </span>
+            </div>
+
+            {showServerConfig && (
+              <div style={{
+                marginTop: "var(--space-2)",
+                background: "var(--color-bg-secondary)",
+                padding: "var(--space-2)",
+                borderRadius: "var(--radius-sm)",
+                fontSize: "11px",
+              }}>
+                <label style={{ display: "block", marginBottom: "4px", color: "var(--color-text-secondary)" }}>
+                  URL Máy Chủ Backend (Mặc định: http://localhost:8000/api hoặc URL Cloudflare Tunnel HTTPS)
+                </label>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <input
+                    type="text"
+                    className="input-field"
+                    style={{ fontSize: "11px", padding: "4px 8px" }}
+                    value={apiUrl}
+                    onChange={(e) => {
+                      setApiUrl(e.target.value);
+                      setApiSuccessMsg("");
+                    }}
+                    placeholder="https://your-tunnel.trycloudflare.com/api"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn--secondary btn--sm"
+                    style={{ fontSize: "11px", whiteSpace: "nowrap" }}
+                    onClick={() => {
+                      setApiBase(apiUrl);
+                      setApiSuccessMsg("Đã lưu địa chỉ API!");
+                      setTimeout(() => setApiSuccessMsg(""), 3000);
+                    }}
+                  >
+                    Lưu
+                  </button>
+                </div>
+                {apiSuccessMsg && (
+                  <div style={{ color: "var(--color-success)", marginTop: "4px", fontSize: "10px" }}>
+                    {apiSuccessMsg}
+                  </div>
+                )}
+                <div style={{ color: "var(--color-text-tertiary)", marginTop: "4px", fontSize: "10px", lineHeight: 1.3 }}>
+                  Ghi chú: Nếu duyệt trên GitHub Pages mà không có Backend HTTPS, hệ thống sẽ tự động kích hoạt Chế Độ Ngoại Tuyến (vẫn đăng nhập và thao tác bình thường).
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

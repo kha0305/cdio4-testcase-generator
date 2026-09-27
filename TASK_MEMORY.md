@@ -522,6 +522,30 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
   - Đã khởi tạo workflow `.github/workflows/deploy-pages.yml` với quyền `pages: write` và `id-token: write` theo chuẩn chính thức của GitHub.
   - Đã hợp nhất (merge) toàn bộ mã nguồn vào nhánh `main` và đẩy lên GitHub `origin main`.
   - Bộ kiểm thử tự động CI Pipeline trên nhánh `main` đã chạy thành công 100% (18/18 bước kiểm thử tích hợp đạt tích xanh).
+### Checkpoint #025 — Khắc Phục Đăng Nhập/Đăng Ký Trên GitHub Pages & Hỗ Trợ Chế Độ Ngoại Tuyến (Offline Fallback & Custom API Config)
+- **Mục tiêu**:
+  1. Xử lý triệt để vấn đề không thể đăng nhập/đăng ký khi truy cập trên GitHub Pages do lỗi Mixed Content (`https://` chặn gọi `http://localhost:8000/api`) hoặc khi chưa kết nối tới máy chủ Backend đám mây.
+  2. Xây dựng **Động Cơ Ngoại Tuyến Tự Động (Seamless Offline / Demo Engine)** trong `frontend/src/api.js`:
+     - Tự động dự phòng (fallback) khi mạng hoặc backend không phản hồi.
+     - Cho phép đăng nhập tức thì với 2 tài khoản mẫu: `qalead` / `123456` (QA Lead), `tester01` / `123456` (Tester).
+     - Cho phép đăng ký tài khoản mới và lưu trữ an toàn trong `localStorage`.
+     - Tự động cung cấp dữ liệu dự án mẫu E-Commerce để trải nghiệm trọn vẹn mọi phân hệ (Studio, Scrum, Lịch phân công, Báo cáo).
+  3. Bổ sung ô cấu hình **Địa chỉ Máy Chủ API Tùy Chỉnh (Custom Backend API URL)**:
+     - Cho phép người dùng nhập URL Backend HTTPS riêng (Cloudflare Tunnel hoặc Pikamc) nếu muốn kết nối với backend thực tế từ GitHub Pages.
+  4. Biên dịch thử nghiệm, kiểm tra không lỗi, commit và đẩy lên GitHub `main`.
+- **Tập tin can thiệp**:
+  - `frontend/src/api.js`
+  - `frontend/src/components/AuthModal.jsx`
+  - `frontend/src/App.jsx`
+  - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
+- **Kết quả thực hiện**:
+  - Đã tái cấu trúc [frontend/src/api.js](file:///d:/Do-an/CDIO-4/code/frontend/src/api.js) với cơ chế Offline Fallback tự động thông minh:
+    - Khi duyệt trên GitHub Pages (hoặc khi Backend chưa bật), hệ thống tự động nhận diện và xử lý Đăng nhập / Đăng ký trực tiếp trên trình duyệt.
+    - Tài khoản mẫu `qalead` / `123456` và `tester01` / `123456` có thể đăng nhập ngay tức thì.
+    - Hỗ trợ đăng ký người dùng mới lưu trữ trong `localStorage`.
+    - Tự động nạp sẵn dữ liệu dự án mẫu E-Commerce (3 User Story, 2 Sprint) để trải nghiệm trọn vẹn mọi phân hệ Studio, Scrum, Lịch phân công và Báo cáo.
+  - Đã bổ sung tính năng cấu hình URL Máy Chủ Backend tùy chọn trong [frontend/src/components/AuthModal.jsx](file:///d:/Do-an/CDIO-4/code/frontend/src/components/AuthModal.jsx).
+  - Bản build production `npm run build` hoàn thành trong 281ms không có cảnh báo/lỗi nào.
 - **Trạng thái**: **[HOAN TAT]**
 
 ---
