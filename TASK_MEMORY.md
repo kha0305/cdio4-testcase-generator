@@ -490,6 +490,21 @@ Mọi Agent và lập trình viên phải **ĐỌC TẬP TIN NÀY TRƯỚC KHI L
   - Menu chuyển tiếp nhanh phân cách bằng dấu chấm tròn `•` (`&bull;`) mỏ neo trực tiếp tới 8 mục chính trong tài liệu.
 - **Trạng thái**: **[HOAN TAT]**
 
+### Checkpoint #023 — Thiết Lập Môi Trường Chạy Tự Động Trên GitHub (CI/CD Actions & Codespaces)
+- **Mục tiêu**: Hỗ trợ chạy toàn bộ dự án trên GitHub thông qua 2 cơ chế chính trên nhánh thử nghiệm riêng biệt (`feature/test-git-runner`):
+  1. **GitHub Actions CI Runner** (`.github/workflows/ci.yml`): Tự động cài đặt Python 3.11, tải thư viện backend, khởi động FastAPI, thực thi trọn vẹn bộ kiểm thử tích hợp 18/18 bước (`run_system_test.py`) và biên dịch giao diện React Vite (`npm run build`) trên hạ tầng đám mây của GitHub mỗi khi đẩy mã.
+  2. **GitHub Codespaces Dev Container** (`.devcontainer/devcontainer.json`): Cho phép chạy trực tiếp ứng dụng Fullstack (Backend port 8000, Frontend port 5173) ngay trên trình duyệt web chỉ bằng 1 cú nhấp chuột mà không cần cài đặt phần mềm trên máy cá nhân.
+- **Tập tin can thiệp**:
+  - `.github/workflows/ci.yml` (Tạo mới)
+  - `.devcontainer/devcontainer.json` (Tạo mới)
+  - `d:/Do-an/CDIO-4/code/TASK_MEMORY.md`
+- **Kết quả thực hiện**:
+  - Đã tách nhánh mới `feature/test-git-runner`.
+  - Khởi tạo thành công workflow CI tự động kiểm thử và build trọn gói dự án trên Ubuntu Runner của GitHub.
+  - Khởi tạo devcontainer chuẩn Microsoft Dev Containers Universal hỗ trợ Python 3.11, Node.js 20 và ánh xạ tự động 2 cổng 8000 & 5173 cho GitHub Codespaces.
+  - Sẵn sàng đẩy nhánh lên GitHub để kích hoạt pipeline đám mây.
+- **Trạng thái**: **[HOAN TAT]**
+
 ---
 
 ## 4. KẾ HOẠCH HÀNH ĐỘNG TIẾP THEO (NEXT ACTION ITEMS)

@@ -1,0 +1,51 @@
+name: CDIO-4 CI Pipeline (Backend Tests & Frontend Build)
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  test-and-build:
+    name: Kiem Tra Tich Hop & Bien Dich Ung Dung
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Ma Nguon
+        uses: actions/checkout@v4
+
+      - name: Thiet Lap Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
+
+      - name: Cai Dat Thu Vien Backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Khoi Dong Backend FastAPI
+        run: |
+          python -m uvicorn main:app --app-dir backend --host 127.0.0.1 --port 8000 &
+          sleep 5
+          curl --retry 5 --retry-delay 2 http://127.0.0.1:8000/docs
+
+      - name: Chay Bo Kiem Thu Tich Hop 18/18 Buoc (System Test)
+        run: |
+          python run_system_test.py
+
+      - name: Thiet Lap Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cai Dat Goi Frontend
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Bien Dich Production Frontend (Vite Build)
+        working-directory: ./frontend
+        run: npm run build
